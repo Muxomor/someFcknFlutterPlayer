@@ -1,7 +1,5 @@
 import 'package:chat_application_flutter/components/photo_box.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:just_audio/just_audio.dart';
 
 class SongPage extends StatefulWidget {
@@ -25,44 +23,7 @@ class _SongPageState extends State<SongPage> {
   final player = AudioPlayer();
   Duration currentDuration = Duration.zero;
   Duration totalDuration = Duration.zero;
-  
-    Widget playPauseButton(
-      ProcessingState processingState) {
-    if (processingState == ProcessingState.loading ||
-        processingState == ProcessingState.buffering) {
-      return Container(
-        margin: EdgeInsets.all(8.0),
-        width: 64.0,
-        height: 64.0,
-        child: CircularProgressIndicator(),
-      );
-    } else if (processingState == ProcessingState.ready) {
-      return IconButton(
-        icon: Icon(Icons.play_arrow),
-        iconSize: 64.0,
-        onPressed: player.play,
-      );
-    } else if (processingState != ProcessingState.completed) {
-      return IconButton(
-        icon: Icon(Icons.pause),
-        iconSize: 64.0,
-        onPressed: player.pause,
-      );
-    } else {
-      return IconButton(
-        icon: Icon(Icons.replay),
-        iconSize: 64.0,
-        onPressed: () => player.seek(Duration.zero),
-      );
-    }
-  }
-  void setPlayerUrl() async{
-await player.setUrl(widget.musicLink);
-  }
   void startPlaying() async {
-    //player.setVolume(1);
-    //await player.stop();
-    //await player.play(UrlSource(widget.musicLink));
     await player.setUrl(widget.musicLink);
     if(player.playing){
       await player.pause();
@@ -70,23 +31,16 @@ await player.setUrl(widget.musicLink);
     else{
     await player.play();
     }
-    
-    //notifyListeners();
   }
 
   void pause() async {
-    //await player.pause();
-    //notifyListeners();
+    await player.pause();
   }
 
-  void resume() async {
-    //await player.resume();
-    //notifyListeners();
-  }
+
 
   @override
   Widget build(BuildContext context) {
-    setPlayerUrl();
     return Scaffold(
       // ignore: deprecated_member_use
       backgroundColor: Theme.of(context).colorScheme.background,
@@ -182,8 +136,11 @@ await player.setUrl(widget.musicLink);
                             ),
                             Expanded(
                                 flex: 2,
-                                child: PhotoBox(
-                                  child: playPauseButton(player.processingState),
+                                child: GestureDetector(
+                                  onTap: () => startPlaying(),
+                                  child: PhotoBox(
+                                    child: Icon(Icons.play_arrow),
+                                  ),
                                 )),
                             const SizedBox(
                               width: 20,
