@@ -21,23 +21,21 @@ class SongPage extends StatefulWidget {
 
 class _SongPageState extends State<SongPage> {
   final player = AudioPlayer();
+  bool isOnRepeat = false;
   Duration currentDuration = Duration.zero;
   Duration totalDuration = Duration.zero;
   void startPlaying() async {
     await player.setUrl(widget.musicLink);
-    if(player.playing){
+    if (player.playing) {
       await player.pause();
-    }
-    else{
-    await player.play();
+    } else {
+      await player.play();
     }
   }
 
   void pause() async {
     await player.pause();
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -106,11 +104,25 @@ class _SongPageState extends State<SongPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 25),
                     child: Column(
                       children: [
-                        const Row(
+                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            Text('0:00'),
-                            Icon(Icons.repeat),
+                            const Text('0:00'),
+                            IconButton(onPressed: ()async {
+                              if(player.loopMode==LoopMode.off)
+                              {
+                                await player.setLoopMode(LoopMode.one);
+                                setState(() {
+                                  isOnRepeat = true;
+                                });
+                              }else{
+                                await player.setLoopMode(LoopMode.off);
+                                setState(() {
+                                  isOnRepeat =false;
+                                });
+                              }
+                              
+                            },icon: !isOnRepeat? const Icon(Icons.repeat):const Icon(Icons.repeat_one)),
                             Text('0:00')
                           ],
                         ),
@@ -126,31 +138,38 @@ class _SongPageState extends State<SongPage> {
                         Row(
                           children: [
                             Expanded(
-                                child: GestureDetector(
-                              onTap: () {},
-                              child:
-                                  const PhotoBox(child: Icon(Icons.replay_30)),
-                            )),
+                                child: PhotoBox(
+                                    child: IconButton(
+                              icon: const Icon(Icons.replay_30),
+                              onPressed: () {
+                                player.seek(currentDuration -=
+                                    const Duration(seconds: 30));
+                              },
+                            ))),
                             const SizedBox(
                               width: 20,
                             ),
                             Expanded(
                                 flex: 2,
-                                child: GestureDetector(
-                                  onTap: () => startPlaying(),
-                                  child: PhotoBox(
-                                    child: Icon(Icons.play_arrow),
-                                  ),
+                                child: PhotoBox(
+                                  child: IconButton(
+                                      onPressed: () => startPlaying(),
+                                      icon: player.playing
+                                          ? Icon(Icons.pause)
+                                          : Icon(Icons.play_arrow)),
                                 )),
                             const SizedBox(
                               width: 20,
                             ),
                             Expanded(
-                                child: GestureDetector(
-                              onTap: () {},
-                              child:
-                                  const PhotoBox(child: Icon(Icons.forward_30)),
-                            ))
+                                child: PhotoBox(
+                                    child: IconButton(
+                              icon: const Icon(Icons.forward_30),
+                              onPressed: () => {
+                                player.seek(currentDuration +=
+                                    const Duration(seconds: 30))
+                              },
+                            )))
                           ],
                         )
                       ],
