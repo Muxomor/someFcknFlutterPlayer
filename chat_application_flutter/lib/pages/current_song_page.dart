@@ -1,9 +1,10 @@
+import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:chat_application_flutter/components/photo_box.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:rxdart/rxdart.dart';
 
 class SongPage extends StatefulWidget {
-  //final dynamic song;
   final String author;
   final String name;
   final String logoLink;
@@ -33,10 +34,23 @@ class _SongPageState extends State<SongPage> {
     }
   }
 
-  void pause() async {
-    await player.pause();
+  Stream<PositionData> get _positionDataStream =>
+      Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
+        player.positionStream,
+        player.bufferedPositionStream,
+        player.durationStream,
+        (position, bufferedPosition, duration) => PositionData(
+          position,
+          bufferedPosition,
+          duration ?? Duration.zero,
+        ),
+      );
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    player.setUrl(widget.musicLink);
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -104,33 +118,42 @@ class _SongPageState extends State<SongPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 25),
                     child: Column(
                       children: [
-                         Row(
+                        Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            const Text('0:00'),
-                            IconButton(onPressed: ()async {
-                              if(player.loopMode==LoopMode.off)
-                              {
-                                await player.setLoopMode(LoopMode.one);
-                                setState(() {
-                                  isOnRepeat = true;
-                                });
-                              }else{
-                                await player.setLoopMode(LoopMode.off);
-                                setState(() {
-                                  isOnRepeat =false;
-                                });
-                              }
-                              
-                            },icon: !isOnRepeat? const Icon(Icons.repeat):const Icon(Icons.repeat_one)),
-                            Text('0:00')
+                            Text(player.position.toString()),
+                            IconButton(
+                                onPressed: () async {
+                                  if (player.loopMode == LoopMode.off) {
+                                    await player.setLoopMode(LoopMode.one);
+                                    setState(() {
+                                      isOnRepeat = true;
+                                    });
+                                  } else {
+                                    await player.setLoopMode(LoopMode.off);
+                                    setState(() {
+                                      isOnRepeat = false;
+                                    });
+                                  }
+                                },
+                                icon: !isOnRepeat
+                                    ? const Icon(Icons.repeat)
+                                    : const Icon(Icons.repeat_one)),
+                            Text(player.duration.toString()),
                           ],
                         ),
-                        Slider(
-                          value: 0,
-                          min: 0,
-                          max: 100,
-                          onChanged: (value) {},
+                        StreamBuilder<PositionData>(
+                          stream: _positionDataStream,
+                          builder: (context, snapshot) {
+                            final positionData = snapshot.data;
+                            return ProgressBar(
+                              progress: positionData?.position ?? Duration.zero,
+                              buffered: positionData?.bufferedPosition ??
+                                  Duration.zero,
+                              total: positionData?.duration ?? Duration.zero,
+                              onSeek: player.seek,
+                            );
+                          },
                         ),
                         const SizedBox(
                           height: 20,
@@ -183,4 +206,11 @@ class _SongPageState extends State<SongPage> {
       ),
     );
   }
+}
+
+class PositionData {
+  const PositionData(this.position, this.bufferedPosition, this.duration);
+  final Duration position;
+  final Duration bufferedPosition;
+  final Duration duration;
 }
