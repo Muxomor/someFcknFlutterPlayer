@@ -28,11 +28,11 @@ class _HomePageState extends State<HomePage> {
               child: CircularProgressIndicator(),
             );
           } else {
-            var orders = snapshot.data!.docs.toList();
+            var songs = snapshot.data!.docs.toList();
             return ListView.builder(
-              itemCount: orders.length,
+              itemCount: songs.length,
               itemBuilder: (context, index) {
-                return musicCards(context, orders[index]);
+                return musicCards(context, songs[index]);
               },
             );
           }
@@ -57,12 +57,13 @@ Widget musicCards(BuildContext context, dynamic docs) {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-              builder: (context) => SongPage(
-                    author: docs['Author'],
-                    logoLink: docs['Logo'],
-                    musicLink: docs['File'],
-                    name: docs['Name'],
-                  )),
+            builder: (context) => SongPage(
+              author: docs['Author'],
+              logoLink: docs['Logo'],
+              musicLink: docs['File'],
+              name: docs['Name'],
+            ),
+          ),
         );
       },
     ),

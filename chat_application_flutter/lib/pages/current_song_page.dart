@@ -22,6 +22,7 @@ class SongPage extends StatefulWidget {
 
 class _SongPageState extends State<SongPage> {
   final player = AudioPlayer();
+
   bool isOnRepeat = false;
   Duration currentDuration = Duration.zero;
   Duration totalDuration = Duration.zero;
@@ -30,7 +31,8 @@ class _SongPageState extends State<SongPage> {
     if (player.playing) {
       await player.pause();
     } else {
-      await player.play();
+      //await player.play();
+      player.play();
     }
   }
 
@@ -45,12 +47,14 @@ class _SongPageState extends State<SongPage> {
           duration ?? Duration.zero,
         ),
       );
-@override
+  @override
   void initState() {
     // TODO: implement initState
     super.initState();
     player.setUrl(widget.musicLink);
+    player.setLoopMode(LoopMode.all);
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,7 +125,6 @@ class _SongPageState extends State<SongPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            Text(player.position.toString()),
                             IconButton(
                                 onPressed: () async {
                                   if (player.loopMode == LoopMode.off) {
@@ -130,7 +133,7 @@ class _SongPageState extends State<SongPage> {
                                       isOnRepeat = true;
                                     });
                                   } else {
-                                    await player.setLoopMode(LoopMode.off);
+                                    await player.setLoopMode(LoopMode.all);
                                     setState(() {
                                       isOnRepeat = false;
                                     });
@@ -139,7 +142,6 @@ class _SongPageState extends State<SongPage> {
                                 icon: !isOnRepeat
                                     ? const Icon(Icons.repeat)
                                     : const Icon(Icons.repeat_one)),
-                            Text(player.duration.toString()),
                           ],
                         ),
                         StreamBuilder<PositionData>(
@@ -173,14 +175,40 @@ class _SongPageState extends State<SongPage> {
                               width: 20,
                             ),
                             Expanded(
-                                flex: 2,
-                                child: PhotoBox(
-                                  child: IconButton(
-                                      onPressed: () => startPlaying(),
-                                      icon: player.playing
-                                          ? Icon(Icons.pause)
-                                          : Icon(Icons.play_arrow)),
-                                )),
+                              flex: 2,
+                              child: PhotoBox(
+                                child: StreamBuilder<PlayerState>(
+                                    stream: player.playerStateStream,
+                                    builder: (context, snapshot) {
+                                      final playerState = snapshot.data;
+                                      final processtingState =
+                                          playerState?.processingState;
+                                      final playing = playerState?.playing;
+                                      if (!(playing ?? false)) {
+                                        return IconButton(
+                                          onPressed: player.play,
+                                          icon: const Icon(Icons.play_arrow),
+                                        );
+                                      } else if (processtingState !=
+                                          ProcessingState.completed) {
+                                        return IconButton(
+                                          onPressed: player.pause,
+                                          icon: const Icon(Icons.pause),
+                                        );
+                                      }
+                                      return const Icon(Icons.play_arrow);
+                                    }),
+                                // child: IconButton(
+                                //     onPressed: () => {
+                                //           setState(() {
+                                //             startPlaying();
+                                //           })
+                                //         },
+                                //     icon: player.playing
+                                //         ? Icon(Icons.pause)
+                                //         : Icon(Icons.play_arrow)),
+                              ),
+                            ),
                             const SizedBox(
                               width: 20,
                             ),
@@ -188,9 +216,11 @@ class _SongPageState extends State<SongPage> {
                                 child: PhotoBox(
                                     child: IconButton(
                               icon: const Icon(Icons.forward_30),
-                              onPressed: () => {
-                                player.seek(currentDuration +=
-                                    const Duration(seconds: 30))
+                              onPressed: () async => {
+                                await player.seek(
+                                  currentDuration +=
+                                      const Duration(seconds: 30),
+                                ),
                               },
                             )))
                           ],
