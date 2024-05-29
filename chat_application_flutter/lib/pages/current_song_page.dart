@@ -62,7 +62,7 @@ class _SongPageState extends State<SongPage> {
       backgroundColor: Theme.of(context).colorScheme.background,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.only(left: 25, right: 2, bottom: 25),
+          padding: const EdgeInsets.only(left: 25, right: 0, bottom: 25),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -88,7 +88,7 @@ class _SongPageState extends State<SongPage> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: Image.network(
-                        height: MediaQuery.of(context).size.height * 0.5,
+                        height: MediaQuery.of(context).size.height * 0.4,
                         widget.logoLink,
                       ),
                     ),
@@ -114,7 +114,7 @@ class _SongPageState extends State<SongPage> {
                 ),
               ),
               const SizedBox(
-                height: 20,
+                height: 10,
               ),
               Column(
                 children: [
@@ -158,7 +158,7 @@ class _SongPageState extends State<SongPage> {
                           },
                         ),
                         const SizedBox(
-                          height: 20,
+                          height: 10,
                         ),
                         Row(
                           children: [
