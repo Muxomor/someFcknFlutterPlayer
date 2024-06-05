@@ -1,4 +1,5 @@
 import 'package:chat_application_flutter/pages/current_song_page.dart';
+import 'package:chat_application_flutter/pages/new_song_page.dart';
 import 'package:chat_application_flutter/themes/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -37,6 +38,14 @@ class _HomePageState extends State<HomePage> {
             );
           }
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => NewSongPage()),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
