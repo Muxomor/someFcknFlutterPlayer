@@ -18,7 +18,18 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        title: const Text('SomeFuckingUslessPlayer'),
+        title: const Text('Deez Nuts'),
+        actions: [
+          IconButton(
+          onPressed: () async {
+            //тут будет переход на страницу трека, но для этого надо сделать чтобы он принимал List<Song>
+          },
+          icon: const Icon(
+            Icons.play_circle_fill,
+            color: Colors.white,
+          ),
+        ),
+        ],
       ),
       drawer: const MyDrawer(),
       body: StreamBuilder(
