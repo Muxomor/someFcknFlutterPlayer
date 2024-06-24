@@ -2,6 +2,7 @@ import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:chat_application_flutter/components/photo_box.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:rxdart/rxdart.dart';
 
 class SongPage extends StatefulWidget {
@@ -51,7 +52,17 @@ class _SongPageState extends State<SongPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    player.setUrl(widget.musicLink);
+    //player.setUrl(widget.musicLink);
+    final _playlist = ConcatenatingAudioSource(children: [AudioSource.uri(
+      Uri.parse(widget.musicLink),
+      tag: MediaItem(
+        id: '1',
+        title: widget.name,
+        artist: widget.author,
+        artUri: Uri.parse(widget.logoLink),
+      ),
+    )]);
+    player.setAudioSource(_playlist);
     player.setLoopMode(LoopMode.all);
   }
 

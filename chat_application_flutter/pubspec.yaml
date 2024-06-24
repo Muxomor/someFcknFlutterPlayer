@@ -39,11 +39,13 @@ dependencies:
   cloud_firestore: ^4.17.4
   provider: ^6.1.2
   toast: ^0.3.0
-  just_audio: ^0.9.38
+  just_audio: ^0.9.38  
+  just_audio_background: ^0.0.1-beta.12
   rxdart: ^0.27.7
   audio_video_progress_bar: ^2.0.3
-  just_audio_background: ^0.0.1-beta.12
+
   firebase_storage: ^11.7.7
+  audio_service: ^0.18.13
 
 dev_dependencies:
   flutter_test:
