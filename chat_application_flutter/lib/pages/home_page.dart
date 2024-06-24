@@ -24,9 +24,9 @@ class _HomePageState extends State<HomePage> {
           onPressed: () async {
             //тут будет переход на страницу трека, но для этого надо сделать чтобы он принимал List<Song>
           },
-          icon: const Icon(
+          icon:  Icon(
             Icons.play_circle_fill,
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.inversePrimary,
           ),
         ),
         ],

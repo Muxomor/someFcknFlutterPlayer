@@ -178,8 +178,7 @@ class _SongPageState extends State<SongPage> {
                                     child: IconButton(
                               icon: const Icon(Icons.replay_30),
                               onPressed: () {
-                                player.seek(currentDuration -=
-                                    const Duration(seconds: 30));
+                                player.seek(Duration(seconds: player.position.inSeconds-30));
                               },
                             ))),
                             const SizedBox(
@@ -229,8 +228,7 @@ class _SongPageState extends State<SongPage> {
                               icon: const Icon(Icons.forward_30),
                               onPressed: () async => {
                                 await player.seek(
-                                  currentDuration +=
-                                      const Duration(seconds: 30),
+                                  Duration(seconds: player.position.inSeconds+30),
                                 ),
                               },
                             )))
