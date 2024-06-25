@@ -1,3 +1,4 @@
+import 'package:chat_application_flutter/components/Song.dart';
 import 'package:chat_application_flutter/pages/current_song_page.dart';
 import 'package:chat_application_flutter/pages/new_song_page.dart';
 import 'package:chat_application_flutter/themes/theme_provider.dart';
@@ -13,6 +14,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  List<Song> playlist = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,14 +23,14 @@ class _HomePageState extends State<HomePage> {
         title: const Text('Deez Nuts'),
         actions: [
           IconButton(
-          onPressed: () async {
-            //тут будет переход на страницу трека, но для этого надо сделать чтобы он принимал List<Song>
-          },
-          icon:  Icon(
-            Icons.play_circle_fill,
-            color: Theme.of(context).colorScheme.inversePrimary,
+            onPressed: () async {
+              //тут будет переход на страницу трека, но для этого надо сделать чтобы он принимал List<Song>
+            },
+            icon: Icon(
+              Icons.play_circle_fill,
+              color: Theme.of(context).colorScheme.inversePrimary,
+            ),
           ),
-        ),
         ],
       ),
       drawer: const MyDrawer(),
@@ -40,7 +42,14 @@ class _HomePageState extends State<HomePage> {
               child: CircularProgressIndicator(),
             );
           } else {
-            var songs = snapshot.data!.docs.toList();
+            var songs = snapshot.data!.docs
+                .map((doc) => Song(
+                      name: doc['Name'],
+                      author: doc['Author'],
+                      logo: doc['Logo'],
+                      file: doc['File'],
+                    ))
+                .toList();
             return ListView.builder(
               itemCount: songs.length,
               itemBuilder: (context, index) {
@@ -62,14 +71,14 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-Widget musicCards(BuildContext context, dynamic docs) {
+Widget musicCards(BuildContext context, Song song) {
   return Card(
     child: ListTile(
       leading: Image.network(
-        docs['Logo'],
+        song.logo.toString(),
       ),
-      title: Text(docs['Name']),
-      subtitle: Text(docs['Author']),
+      title: Text(song.name.toString()),
+      subtitle: Text(song.author.toString()),
       trailing: const Icon(
         Icons.play_arrow,
         size: 20,
@@ -78,10 +87,10 @@ Widget musicCards(BuildContext context, dynamic docs) {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => SongPage(
-              author: docs['Author'],
-              logoLink: docs['Logo'],
-              musicLink: docs['File'],
-              name: docs['Name'],
+              author: song.author.toString(),
+              logoLink: song.logo.toString(),
+              musicLink: song.file.toString(),
+              name: song.name.toString(),
             ),
           ),
         );

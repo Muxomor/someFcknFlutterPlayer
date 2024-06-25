@@ -52,6 +52,7 @@ class _SongPageState extends State<SongPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    player.stop();
     //player.setUrl(widget.musicLink);
     final _playlist = ConcatenatingAudioSource(children: [AudioSource.uri(
       Uri.parse(widget.musicLink),
