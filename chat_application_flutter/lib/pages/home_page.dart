@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+List<Song> playlist = [];
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -14,7 +16,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Song> playlist = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,10 +51,13 @@ class _HomePageState extends State<HomePage> {
                       file: doc['File'],
                     ))
                 .toList();
+                
             return ListView.builder(
               itemCount: songs.length,
               itemBuilder: (context, index) {
-                return musicCards(context, songs[index]);
+                return MusicCard(
+                  song: songs[index],
+                );
               },
             );
           }
@@ -72,6 +76,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 Widget musicCards(BuildContext context, Song song) {
+  bool isChecked = false;
   return Card(
     child: ListTile(
       leading: Image.network(
@@ -97,6 +102,55 @@ Widget musicCards(BuildContext context, Song song) {
       },
     ),
   );
+}
+
+class MusicCard extends StatefulWidget {
+  final Song song;
+  const MusicCard({super.key, required this.song});
+
+  @override
+  State<MusicCard> createState() => _MusicCardState();
+}
+
+class _MusicCardState extends State<MusicCard> {
+  bool? isChecked = true;
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        leading: Image.network(
+          widget.song.logo.toString(),
+        ),
+        title: Text(widget.song.name.toString()),
+        subtitle: Text(widget.song.author.toString()),
+        trailing: Checkbox(
+            value: playlist.contains(widget.song),
+            onChanged: (bool? value) {
+              setState(() {
+                isChecked = value;
+              });
+              if(value!){
+                playlist.add(widget.song);
+              }
+              else{
+                playlist.remove(widget.song);
+              }
+            }),
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => SongPage(
+                author: widget.song.author.toString(),
+                logoLink: widget.song.logo.toString(),
+                musicLink: widget.song.file.toString(),
+                name: widget.song.name.toString(),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
 
 class MyDrawer extends StatelessWidget {
