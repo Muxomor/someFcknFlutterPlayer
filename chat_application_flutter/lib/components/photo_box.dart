@@ -23,7 +23,7 @@ class PhotoBox extends StatelessWidget {
            BoxShadow(
               color: Colors.grey.shade300, blurRadius: 5, offset:const Offset(-2, -2)),
         ]),
-    padding: EdgeInsets.all(10),
+    padding: const EdgeInsets.all(10),
     child: child,
   );
   }

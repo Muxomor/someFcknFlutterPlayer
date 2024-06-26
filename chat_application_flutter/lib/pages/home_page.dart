@@ -19,6 +19,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // ignore: deprecated_member_use
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: const Text('Deez Nuts'),
@@ -51,7 +52,6 @@ class _HomePageState extends State<HomePage> {
                       file: doc['File'],
                     ))
                 .toList();
-
             return ListView.builder(
               itemCount: songs.length,
               itemBuilder: (context, index) {
@@ -66,7 +66,7 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => NewSongPage()),
+            MaterialPageRoute(builder: (context) => const NewSongPage()),
           );
         },
         child: const Icon(Icons.add),
@@ -76,7 +76,6 @@ class _HomePageState extends State<HomePage> {
 }
 
 Widget musicCards(BuildContext context, Song song) {
-  bool isChecked = false;
   return Card(
     child: ListTile(
       leading: Image.network(

@@ -1,5 +1,7 @@
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
+import 'package:chat_application_flutter/components/Song.dart';
 import 'package:chat_application_flutter/components/photo_box.dart';
+import 'package:chat_application_flutter/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
@@ -15,7 +17,8 @@ class SongPage extends StatefulWidget {
       required this.author,
       required this.logoLink,
       required this.musicLink,
-      required this.name});
+      required this.name,
+      List<Song>? playlist});
 
   @override
   State<SongPage> createState() => _SongPageState();
@@ -52,17 +55,40 @@ class _SongPageState extends State<SongPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    player.stop();
-    //player.setUrl(widget.musicLink);
-    final _playlist = ConcatenatingAudioSource(children: [AudioSource.uri(
-      Uri.parse(widget.musicLink),
-      tag: MediaItem(
-        id: '1',
-        title: widget.name,
-        artist: widget.author,
-        artUri: Uri.parse(widget.logoLink),
-      ),
-    )]);
+    List<AudioSource> sources = [];
+    var _playlist;
+    if (playlist.isEmpty) {
+      final _playlist = ConcatenatingAudioSource(children: [
+        AudioSource.uri(
+          Uri.parse(widget.musicLink),
+          tag: MediaItem(
+            id: '1',
+            title: widget.name,
+            artist: widget.author,
+            artUri: Uri.parse(widget.logoLink),
+          ),
+        )
+      ]);
+    } else {
+      //добавление в фоновый плейлист через цикл
+      for (Song item in playlist) {
+        sources.add(
+          AudioSource.uri(
+            Uri.parse(item.file.toString()),
+            tag: MediaItem(
+              id: item.name.toString(),
+              title: item.name.toString(),
+              artist: item.author.toString(),
+              artUri: Uri.parse(
+                item.logo.toString(),
+              ),
+            ),
+          ),
+        );
+      }
+      //заполнение источников для фона из массива
+      _playlist = ConcatenatingAudioSource(children: sources);
+    }
     player.setAudioSource(_playlist);
     player.setLoopMode(LoopMode.all);
   }
@@ -83,6 +109,7 @@ class _SongPageState extends State<SongPage> {
                 children: [
                   IconButton(
                     onPressed: () {
+                      player.stop();
                       Navigator.pop(context);
                     },
                     icon: const Icon(Icons.arrow_back_outlined),
@@ -179,7 +206,8 @@ class _SongPageState extends State<SongPage> {
                                     child: IconButton(
                               icon: const Icon(Icons.replay_30),
                               onPressed: () {
-                                player.seek(Duration(seconds: player.position.inSeconds-30));
+                                player.seek(Duration(
+                                    seconds: player.position.inSeconds - 30));
                               },
                             ))),
                             const SizedBox(
@@ -229,7 +257,8 @@ class _SongPageState extends State<SongPage> {
                               icon: const Icon(Icons.forward_30),
                               onPressed: () async => {
                                 await player.seek(
-                                  Duration(seconds: player.position.inSeconds+30),
+                                  Duration(
+                                      seconds: player.position.inSeconds + 30),
                                 ),
                               },
                             )))
