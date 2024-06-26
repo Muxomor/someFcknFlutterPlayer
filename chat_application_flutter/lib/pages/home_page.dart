@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
                       file: doc['File'],
                     ))
                 .toList();
-                
+
             return ListView.builder(
               itemCount: songs.length,
               itemBuilder: (context, index) {
@@ -129,10 +129,9 @@ class _MusicCardState extends State<MusicCard> {
               setState(() {
                 isChecked = value;
               });
-              if(value!){
+              if (value!) {
                 playlist.add(widget.song);
-              }
-              else{
+              } else {
                 playlist.remove(widget.song);
               }
             }),
