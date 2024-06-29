@@ -26,7 +26,6 @@ class SongPage extends StatefulWidget {
 
 class _SongPageState extends State<SongPage> {
   final player = AudioPlayer();
-
   bool isOnRepeat = false;
   Duration currentDuration = Duration.zero;
   Duration totalDuration = Duration.zero;
@@ -90,6 +89,7 @@ class _SongPageState extends State<SongPage> {
       _playlist = ConcatenatingAudioSource(children: sources);
     }
     player.setAudioSource(_playlist);
+
     player.setLoopMode(LoopMode.all);
   }
 
@@ -121,33 +121,24 @@ class _SongPageState extends State<SongPage> {
                   ),
                 ],
               ),
+              //logo + artist name + track name
               PhotoBox(
                 child: Column(
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        height: MediaQuery.of(context).size.height * 0.4,
-                        widget.logoLink,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Row(
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget.name,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 20),
-                              ),
-                              Text(widget.author),
-                            ],
-                          )
-                        ],
-                      ),
+                    StreamBuilder(
+                      stream: player.sequenceStateStream,
+                      builder: (context, snapshot) {
+                        final state = snapshot.data;
+                        if (state?.sequence.isEmpty ?? true) {
+                          return const SizedBox();
+                        }
+                        final metadata = state!.currentSource!.tag as MediaItem;
+                        return MediaMetadata(
+                          logoLink: metadata.artUri.toString(),
+                          name: metadata.title,
+                          author: metadata.artist.toString(),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -161,6 +152,7 @@ class _SongPageState extends State<SongPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 25),
                     child: Column(
                       children: [
+                        //instruments, repeat, shuffle, etc...
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
@@ -183,6 +175,7 @@ class _SongPageState extends State<SongPage> {
                                     : const Icon(Icons.repeat_one)),
                           ],
                         ),
+                        //progress bar for current track
                         StreamBuilder<PositionData>(
                           stream: _positionDataStream,
                           builder: (context, snapshot) {
@@ -202,6 +195,7 @@ class _SongPageState extends State<SongPage> {
                         Row(
                           children: [
                             Expanded(
+                              //seek -30
                                 child: PhotoBox(
                                     child: IconButton(
                               icon: const Icon(Icons.replay_30),
@@ -215,6 +209,7 @@ class _SongPageState extends State<SongPage> {
                             ),
                             Expanded(
                               flex: 2,
+                              //play pause button
                               child: PhotoBox(
                                 child: StreamBuilder<PlayerState>(
                                     stream: player.playerStateStream,
@@ -237,21 +232,13 @@ class _SongPageState extends State<SongPage> {
                                       }
                                       return const Icon(Icons.play_arrow);
                                     }),
-                                // child: IconButton(
-                                //     onPressed: () => {
-                                //           setState(() {
-                                //             startPlaying();
-                                //           })
-                                //         },
-                                //     icon: player.playing
-                                //         ? Icon(Icons.pause)
-                                //         : Icon(Icons.play_arrow)),
                               ),
                             ),
                             const SizedBox(
                               width: 20,
                             ),
                             Expanded(
+                              //seek +30
                                 child: PhotoBox(
                                     child: IconButton(
                               icon: const Icon(Icons.forward_30),
@@ -276,10 +263,59 @@ class _SongPageState extends State<SongPage> {
     );
   }
 }
-
+//for progress bar(deez nuts)
 class PositionData {
   const PositionData(this.position, this.bufferedPosition, this.duration);
   final Duration position;
   final Duration bufferedPosition;
   final Duration duration;
+}
+
+
+//for current track name, author,logo
+class MediaMetadata extends StatelessWidget {
+  const MediaMetadata({
+    super.key,
+    required this.logoLink,
+    required this.name,
+    required this.author,
+  });
+  final String logoLink;
+  final String name;
+  final String author;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            height: MediaQuery.of(context).size.height * 0.4,
+            logoLink,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  //current track name
+                  Text(
+                    name,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 20),
+                  ),
+                  //current track author
+                  Text(author),
+                ],
+              )
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 }
