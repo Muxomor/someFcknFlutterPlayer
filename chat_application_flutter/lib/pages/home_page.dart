@@ -5,6 +5,7 @@ import 'package:chat_application_flutter/themes/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:toast/toast.dart';
 
 List<Song> playlist = [];
 
@@ -18,6 +19,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
+    ToastContext().init(context);
     return Scaffold(
       // ignore: deprecated_member_use
       backgroundColor: Theme.of(context).colorScheme.background,
@@ -27,6 +29,18 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             onPressed: () async {
               //тут будет переход на страницу трека, но для этого надо сделать чтобы он принимал List<Song>
+              if (playlist.length == 0) {
+                Toast.show(
+                    'Для начала работы выберите один или более треков из треклиста');
+              } else {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => SongPage(
+                      playlist: playlist,
+                    ),
+                  ),
+                );
+              }
             },
             icon: Icon(
               Icons.play_circle_fill,
@@ -91,10 +105,7 @@ Widget musicCards(BuildContext context, Song song) {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => SongPage(
-              author: song.author.toString(),
-              logoLink: song.logo.toString(),
-              musicLink: song.file.toString(),
-              name: song.name.toString(),
+              playlist:[Song(author: song.author,file: song.file,logo: song.logo,name: song.name)],
             ),
           ),
         );
@@ -135,13 +146,11 @@ class _MusicCardState extends State<MusicCard> {
               }
             }),
         onTap: () {
+          List<Song> localSong = [widget.song];
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => SongPage(
-                author: widget.song.author.toString(),
-                logoLink: widget.song.logo.toString(),
-                musicLink: widget.song.file.toString(),
-                name: widget.song.name.toString(),
+                playlist: localSong,
               ),
             ),
           );

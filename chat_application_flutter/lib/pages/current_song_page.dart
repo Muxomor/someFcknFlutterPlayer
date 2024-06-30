@@ -8,17 +8,11 @@ import 'package:just_audio_background/just_audio_background.dart';
 import 'package:rxdart/rxdart.dart';
 
 class SongPage extends StatefulWidget {
-  final String author;
-  final String name;
-  final String logoLink;
-  final String musicLink;
+
+  final List<Song> playlist;
   const SongPage(
       {super.key,
-      required this.author,
-      required this.logoLink,
-      required this.musicLink,
-      required this.name,
-      List<Song>? playlist});
+      required this.playlist});
 
   @override
   State<SongPage> createState() => _SongPageState();
@@ -29,15 +23,6 @@ class _SongPageState extends State<SongPage> {
   bool isOnRepeat = false;
   Duration currentDuration = Duration.zero;
   Duration totalDuration = Duration.zero;
-  void startPlaying() async {
-    await player.setUrl(widget.musicLink);
-    if (player.playing) {
-      await player.pause();
-    } else {
-      //await player.play();
-      player.play();
-    }
-  }
 
   Stream<PositionData> get _positionDataStream =>
       Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
@@ -50,27 +35,28 @@ class _SongPageState extends State<SongPage> {
           duration ?? Duration.zero,
         ),
       );
+      
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    List<AudioSource> sources = [];
-    var _playlist;
-    if (playlist.isEmpty) {
-      final _playlist = ConcatenatingAudioSource(children: [
-        AudioSource.uri(
-          Uri.parse(widget.musicLink),
-          tag: MediaItem(
-            id: '1',
-            title: widget.name,
-            artist: widget.author,
-            artUri: Uri.parse(widget.logoLink),
-          ),
-        )
-      ]);
-    } else {
-      //добавление в фоновый плейлист через цикл
-      for (Song item in playlist) {
+     List<AudioSource> sources = [];
+     var _playlist;
+    // if (playlist.first == []) {
+    //   final _playlist = ConcatenatingAudioSource(children: [
+    //     AudioSource.uri(
+    //       Uri.parse(widget.musicLink),
+    //       tag: MediaItem(
+    //         id: '1',
+    //         title: widget.name,
+    //         artist: widget.author,
+    //         artUri: Uri.parse(widget.logoLink),
+    //       ),
+    //     )
+    //   ]);
+    // } else {
+    //   //добавление в фоновый плейлист через цикл
+      for (Song item in widget.playlist) {
         sources.add(
           AudioSource.uri(
             Uri.parse(item.file.toString()),
@@ -87,14 +73,16 @@ class _SongPageState extends State<SongPage> {
       }
       //заполнение источников для фона из массива
       _playlist = ConcatenatingAudioSource(children: sources);
-    }
+    // }
+    //устанавливаем источник аудио
     player.setAudioSource(_playlist);
 
-    player.setLoopMode(LoopMode.all);
+    
   }
 
   @override
   Widget build(BuildContext context) {
+    //player.setLoopMode(LoopMode.all);
     return Scaffold(
       // ignore: deprecated_member_use
       backgroundColor: Theme.of(context).colorScheme.background,
@@ -158,16 +146,21 @@ class _SongPageState extends State<SongPage> {
                           children: [
                             IconButton(
                                 onPressed: () async {
-                                  if (player.loopMode == LoopMode.off) {
+                                  if (player.loopMode == LoopMode.all) {
                                     await player.setLoopMode(LoopMode.one);
-                                    setState(() {
-                                      isOnRepeat = true;
+                                    setState(()  {
+                                      
+                                      isOnRepeat = !isOnRepeat;
                                     });
-                                  } else {
+                                  } else if(player.loopMode == LoopMode.one){
                                     await player.setLoopMode(LoopMode.all);
-                                    setState(() {
-                                      isOnRepeat = false;
+                                    setState(()  {
+                                      
+                                      isOnRepeat = !isOnRepeat;
                                     });
+                                  }
+                                  else{
+                                    await player.setLoopMode(LoopMode.all);
                                   }
                                 },
                                 icon: !isOnRepeat
