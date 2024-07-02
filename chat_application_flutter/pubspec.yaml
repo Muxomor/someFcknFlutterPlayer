@@ -43,7 +43,6 @@ dependencies:
   just_audio_background: ^0.0.1-beta.12
   rxdart: ^0.27.7
   audio_video_progress_bar: ^2.0.3
-
   firebase_storage: ^11.7.7
   audio_service: ^0.18.13
   cached_network_image: ^3.3.1

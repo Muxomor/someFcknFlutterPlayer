@@ -50,6 +50,7 @@ class _CurrentRadioState extends State<CurrentRadio> {
   
   @override
   Widget build(BuildContext context) {
+    player.setLoopMode(LoopMode.one);
     return Scaffold(
       // ignore: deprecated_member_use
       backgroundColor: Theme.of(context).colorScheme.background,
