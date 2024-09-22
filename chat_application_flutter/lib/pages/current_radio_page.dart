@@ -56,7 +56,7 @@ class _CurrentRadioState extends State<CurrentRadio> {
       backgroundColor: Theme.of(context).colorScheme.background,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.only(left: 25, right: 0, bottom: 25),
+          padding: const EdgeInsets.only(left: 25, right: 0, bottom: 5),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

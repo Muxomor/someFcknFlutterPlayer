@@ -1,7 +1,6 @@
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:chat_application_flutter/components/Song.dart';
 import 'package:chat_application_flutter/components/photo_box.dart';
-import 'package:chat_application_flutter/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
