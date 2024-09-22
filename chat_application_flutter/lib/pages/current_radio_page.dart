@@ -23,7 +23,7 @@ class _CurrentRadioState extends State<CurrentRadio> {
     super.initState();
      List<AudioSource> sources = [];
      var _playlist;
-    //   //добавление в фоновый плейлист через цикл
+     //добавление в фоновый плейлист через цикл
       for (Song item in widget.playlist) {
         sources.add(
           AudioSource.uri(

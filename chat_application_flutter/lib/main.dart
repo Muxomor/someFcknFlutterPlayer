@@ -1,5 +1,5 @@
 import 'package:chat_application_flutter/pages/home_page.dart';
-import 'package:chat_application_flutter/themes/theme_provider.dart';
+import 'package:chat_application_flutter/themes/custom_theme_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio_background/just_audio_background.dart';
@@ -22,7 +22,7 @@ void main() async {
   );
   runApp(
     ChangeNotifierProvider(
-      create: (context) => ThemeProvider(),
+      create: (context) => CustomThemeProvider(),
       child: const MyApp(),
     ),
   );
@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: const HomePage(),
-      theme: Provider.of<ThemeProvider>(context).themeData,
+      theme: Provider.of<CustomThemeProvider>(context).themeData,
     );
   }
 }

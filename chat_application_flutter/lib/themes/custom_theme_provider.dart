@@ -2,10 +2,12 @@ import 'package:chat_application_flutter/themes/dark.dart';
 import 'package:chat_application_flutter/themes/light.dart';
 import 'package:flutter/material.dart';
 
-class ThemeProvider extends ChangeNotifier{
+//TODO: fix this bullshit
+class CustomThemeProvider extends ChangeNotifier{
   ThemeData _themeData = lightMode;
   ThemeData get themeData => _themeData;
   bool get isLightMode => _themeData == lightMode;
+  bool get isDarkMode => _themeData == darkMode;
 
   set themeData(ThemeData themeData){
     _themeData = themeData;

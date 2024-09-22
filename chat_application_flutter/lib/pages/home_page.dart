@@ -2,11 +2,12 @@ import 'package:chat_application_flutter/components/Song.dart';
 import 'package:chat_application_flutter/pages/current_song_page.dart';
 import 'package:chat_application_flutter/pages/new_song_page.dart';
 import 'package:chat_application_flutter/pages/radios_page.dart';
-import 'package:chat_application_flutter/themes/theme_provider.dart';
+import 'package:chat_application_flutter/themes/custom_theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:toast/toast.dart';
+
 
 List<Song> playlist = [];
 
@@ -106,7 +107,13 @@ Widget musicCards(BuildContext context, Song song) {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => SongPage(
-              playlist:[Song(author: song.author,file: song.file,logo: song.logo,name: song.name)],
+              playlist: [
+                Song(
+                    author: song.author,
+                    file: song.file,
+                    logo: song.logo,
+                    name: song.name)
+              ],
             ),
           ),
         );
@@ -195,25 +202,41 @@ class MyDrawer extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: ListTile(
+              title: const Text(
+                'Radio',
+                style: TextStyle(fontSize: 20),
+              ),
+              leading: const Icon(
+                Icons.home,
+                size: 20,
+              ),
+              onTap: () =>  Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const RadioPage()))
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListTile(
               title: Row(
                 children: [
                   const Text(
-                    'ChangeTheme',
+                    'Change theme',
                     style: TextStyle(fontSize: 20),
                   ),
                   Switch(
-                      value: Provider.of<ThemeProvider>(context, listen: false)
-                          .isLightMode,
-                      onChanged: ((value) =>
-                          Provider.of<ThemeProvider>(context, listen: false)
-                              .changeTheme()))
+                    value: Provider.of<CustomThemeProvider>(context)
+                        .isDarkMode,
+                    onChanged: ((value) =>
+                        Provider.of<CustomThemeProvider>(context)
+                            .changeTheme()),
+                  )
                 ],
               ),
               leading: const Icon(
                 Icons.brightness_6_outlined,
                 size: 20,
               ),
-              onTap: () => Provider.of<ThemeProvider>(context).changeTheme(),
+              onTap: () => Provider.of<CustomThemeProvider>(context).changeTheme(),
             ),
           ),
         ],
