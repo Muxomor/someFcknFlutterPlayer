@@ -167,7 +167,7 @@ class MyDrawer extends StatelessWidget {
                 Icons.brightness_6_outlined,
                 size: 20,
               ),
-              onTap: () => Provider.of<CustomThemeProvider>(context).changeTheme(),
+              onTap: () => ThemeProvider.controllerOf(context).nextTheme(),
             ),
           ),
         ],

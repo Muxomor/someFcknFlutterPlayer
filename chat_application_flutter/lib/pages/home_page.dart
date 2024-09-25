@@ -6,6 +6,7 @@ import 'package:chat_application_flutter/themes/custom_theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:theme_provider/theme_provider.dart';
 import 'package:toast/toast.dart';
 
 
@@ -224,20 +225,17 @@ class MyDrawer extends StatelessWidget {
                     'Change theme',
                     style: TextStyle(fontSize: 20),
                   ),
-                  // Switch(
-                  //   value: Provider.of<CustomThemeProvider>(context, listen: false)
-                  //       .isDarkMode,
-                  //   onChanged: ((value) =>
-                  //       Provider.of<CustomThemeProvider>(context,listen: false)
-                  //           .changeTheme()),
-                  // )
+                                     Switch(
+                       value: ThemeProvider.controllerOf(context).currentThemeId == 'dark' ? true: false,
+                       onChanged: ((value) =>
+                           ThemeProvider.controllerOf(context).nextTheme()),)
                 ],
               ),
               leading: const Icon(
                 Icons.brightness_6_outlined,
                 size: 20,
               ),
-              //onTap: () => Provider.of<CustomThemeProvider>(context, listen: false).changeTheme(),
+                onTap: () => ThemeProvider.controllerOf(context).nextTheme(),
             ),
           ),
         ],
