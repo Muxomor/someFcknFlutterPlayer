@@ -1,10 +1,7 @@
 import 'package:chat_application_flutter/components/Song.dart';
 import 'package:chat_application_flutter/pages/current_song_page.dart';
-import 'package:chat_application_flutter/pages/new_song_page.dart';
 import 'package:chat_application_flutter/pages/radios_page.dart';
-import 'package:chat_application_flutter/themes/custom_theme_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:theme_provider/theme_provider.dart';
 import 'package:toast/toast.dart';

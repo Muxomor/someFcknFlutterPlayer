@@ -1,11 +1,9 @@
 import 'package:chat_application_flutter/pages/home_page.dart';
-import 'package:chat_application_flutter/themes/custom_theme_provider.dart';
 import 'package:chat_application_flutter/themes/dark.dart';
 import 'package:chat_application_flutter/themes/light.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio_background/just_audio_background.dart';
-import 'package:provider/provider.dart';
 import 'package:theme_provider/theme_provider.dart';
 
 void main() async {
