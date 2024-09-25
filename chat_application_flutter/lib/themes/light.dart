@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:theme_provider/theme_provider.dart';
 
 ThemeData lightMode= ThemeData(
   colorScheme: ColorScheme.light(
@@ -10,3 +11,7 @@ ThemeData lightMode= ThemeData(
   ),
   
 );
+
+AppTheme lightAppTheme() {
+return AppTheme(id: 'light', data: lightMode, description: 'Custom Light Theme');
+}

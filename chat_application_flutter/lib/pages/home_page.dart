@@ -19,6 +19,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  TextEditingController searchController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     ToastContext().init(context);
@@ -27,10 +28,10 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: const Text('Deez Nuts'),
+        //TODO: implements search bar you fucking moron
         actions: [
           IconButton(
             onPressed: () async {
-              //тут будет переход на страницу трека, но для этого надо сделать чтобы он принимал List<Song>
               if (playlist.length == 0) {
                 Toast.show(
                     'Для начала работы выберите один или более треков из треклиста');
@@ -207,7 +208,7 @@ class MyDrawer extends StatelessWidget {
                 style: TextStyle(fontSize: 20),
               ),
               leading: const Icon(
-                Icons.home,
+                Icons.radio,
                 size: 20,
               ),
               onTap: () =>  Navigator.of(context).push(
@@ -224,10 +225,10 @@ class MyDrawer extends StatelessWidget {
                     style: TextStyle(fontSize: 20),
                   ),
                   Switch(
-                    value: Provider.of<CustomThemeProvider>(context)
+                    value: Provider.of<CustomThemeProvider>(context, listen: false)
                         .isDarkMode,
                     onChanged: ((value) =>
-                        Provider.of<CustomThemeProvider>(context)
+                        Provider.of<CustomThemeProvider>(context,listen: false)
                             .changeTheme()),
                   )
                 ],
@@ -236,7 +237,7 @@ class MyDrawer extends StatelessWidget {
                 Icons.brightness_6_outlined,
                 size: 20,
               ),
-              onTap: () => Provider.of<CustomThemeProvider>(context).changeTheme(),
+              onTap: () => Provider.of<CustomThemeProvider>(context, listen: false).changeTheme(),
             ),
           ),
         ],
