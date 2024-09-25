@@ -224,20 +224,20 @@ class MyDrawer extends StatelessWidget {
                     'Change theme',
                     style: TextStyle(fontSize: 20),
                   ),
-                  Switch(
-                    value: Provider.of<CustomThemeProvider>(context, listen: false)
-                        .isDarkMode,
-                    onChanged: ((value) =>
-                        Provider.of<CustomThemeProvider>(context,listen: false)
-                            .changeTheme()),
-                  )
+                  // Switch(
+                  //   value: Provider.of<CustomThemeProvider>(context, listen: false)
+                  //       .isDarkMode,
+                  //   onChanged: ((value) =>
+                  //       Provider.of<CustomThemeProvider>(context,listen: false)
+                  //           .changeTheme()),
+                  // )
                 ],
               ),
               leading: const Icon(
                 Icons.brightness_6_outlined,
                 size: 20,
               ),
-              onTap: () => Provider.of<CustomThemeProvider>(context, listen: false).changeTheme(),
+              //onTap: () => Provider.of<CustomThemeProvider>(context, listen: false).changeTheme(),
             ),
           ),
         ],

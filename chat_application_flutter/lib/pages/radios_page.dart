@@ -6,6 +6,7 @@ import 'package:chat_application_flutter/themes/custom_theme_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:theme_provider/theme_provider.dart';
 import 'package:toast/toast.dart';
 
 class RadioPage extends StatefulWidget {
@@ -101,6 +102,7 @@ class _MusicCardState extends State<MusicCard> {
 }
 
 class MyDrawer extends StatelessWidget {
+
   const MyDrawer({super.key});
   @override
   Widget build(BuildContext context) {
@@ -155,12 +157,10 @@ class MyDrawer extends StatelessWidget {
                     'Change theme',
                     style: TextStyle(fontSize: 20),
                   ),
-                  Switch(
-                      value: Provider.of<CustomThemeProvider>(context, listen: false)
-                          .isDarkMode,
-                      onChanged: ((value) =>
-                          Provider.of<CustomThemeProvider>(context, listen: false)
-                              .changeTheme()))
+                   Switch(
+                       value: ThemeProvider.controllerOf(context).currentThemeId == 'dark' ? true: false,
+                       onChanged: ((value) =>
+                           ThemeProvider.controllerOf(context).nextTheme()),)
                 ],
               ),
               leading: const Icon(
