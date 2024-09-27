@@ -1,4 +1,5 @@
 import 'package:chat_application_flutter/components/Song.dart';
+import 'package:chat_application_flutter/components/drawer_navigation.dart';
 import 'package:chat_application_flutter/pages/current_radio_page.dart';
 import 'package:chat_application_flutter/pages/home_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -22,7 +23,7 @@ class _RadioPageState extends State<RadioPage> {
       appBar: AppBar(
         title: const Text('Radio(Ligma)'),
       ),
-      drawer: MyDrawer(),
+      drawer: const CustomDrawer(),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance.collection('Radio').snapshots(),
         builder: (context, snapshot) {
