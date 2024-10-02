@@ -23,7 +23,7 @@ class _RadioPageState extends State<RadioPage> {
       appBar: AppBar(
         title: const Text('Radio(Ligma)'),
       ),
-      drawer: const CustomDrawer(),
+      drawer: MyDrawer(),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance.collection('Radio').snapshots(),
         builder: (context, snapshot) {
