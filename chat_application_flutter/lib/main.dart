@@ -1,5 +1,4 @@
 import 'package:chat_application_flutter/pages/home_page.dart';
-import 'package:chat_application_flutter/routes/routes.dart';
 import 'package:chat_application_flutter/themes/dark.dart';
 import 'package:chat_application_flutter/themes/light.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -61,8 +60,7 @@ class MyApp extends StatelessWidget {
           builder: (themeContext) => MaterialApp(
             theme: ThemeProvider.themeOf(themeContext).data,
             title: 'Music Player',
-            initialRoute: '/songHomePage',
-            routes: routes,
+            home: const HomePage(),
           ),
         ),
       ),
