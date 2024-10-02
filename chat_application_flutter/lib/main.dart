@@ -1,3 +1,4 @@
+import 'package:chat_application_flutter/pages/home_page.dart';
 import 'package:chat_application_flutter/routes/routes.dart';
 import 'package:chat_application_flutter/themes/dark.dart';
 import 'package:chat_application_flutter/themes/light.dart';
