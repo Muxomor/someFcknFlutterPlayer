@@ -90,6 +90,36 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
+Widget musicCards(BuildContext context, Song song) {
+  return Card(
+    child: ListTile(
+      leading: Image.network(
+        song.logo.toString(),
+      ),
+      title: Text(song.name.toString()),
+      subtitle: Text(song.author.toString()),
+      trailing: const Icon(
+        Icons.play_arrow,
+        size: 20,
+      ),
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => SongPage(
+              playlist: [
+                Song(
+                    author: song.author,
+                    file: song.file,
+                    logo: song.logo,
+                    name: song.name)
+              ],
+            ),
+          ),
+        );
+      },
+    ),
+  );
+}
 
 class MusicCard extends StatefulWidget {
   final Song song;
