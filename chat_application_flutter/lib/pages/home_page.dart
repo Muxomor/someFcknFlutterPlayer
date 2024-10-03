@@ -7,7 +7,6 @@ import 'package:theme_provider/theme_provider.dart';
 import 'package:theme_provider/theme_provider.dart';
 import 'package:toast/toast.dart';
 
-
 List<Song> playlist = [];
 
 class HomePage extends StatefulWidget {
@@ -202,17 +201,16 @@ class MyDrawer extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: ListTile(
-              title: const Text(
-                'Radio',
-                style: TextStyle(fontSize: 20),
-              ),
-              leading: const Icon(
-                Icons.radio,
-                size: 20,
-              ),
-              onTap: () =>  Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const RadioPage()))
-            ),
+                title: const Text(
+                  'Radio',
+                  style: TextStyle(fontSize: 20),
+                ),
+                leading: const Icon(
+                  Icons.radio,
+                  size: 20,
+                ),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const RadioPage()))),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -223,17 +221,21 @@ class MyDrawer extends StatelessWidget {
                     'Change theme',
                     style: TextStyle(fontSize: 20),
                   ),
-                                     Switch(
-                       value: ThemeProvider.controllerOf(context).currentThemeId == 'dark' ? true: false,
-                       onChanged: ((value) =>
-                           ThemeProvider.controllerOf(context).nextTheme()),)
+                  Switch(
+                    value: ThemeProvider.controllerOf(context).currentThemeId ==
+                            'dark'
+                        ? true
+                        : false,
+                    onChanged: ((value) =>
+                        ThemeProvider.controllerOf(context).nextTheme()),
+                  )
                 ],
               ),
               leading: const Icon(
                 Icons.brightness_6_outlined,
                 size: 20,
               ),
-                onTap: () => ThemeProvider.controllerOf(context).nextTheme(),
+              onTap: () => ThemeProvider.controllerOf(context).nextTheme(),
             ),
           ),
         ],
