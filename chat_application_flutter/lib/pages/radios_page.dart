@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:theme_provider/theme_provider.dart';
 
-
 class RadioPage extends StatefulWidget {
   const RadioPage({super.key});
 
@@ -62,7 +61,6 @@ class _RadioPageState extends State<RadioPage> {
   }
 }
 
-
 class MusicCard extends StatefulWidget {
   final Song song;
   const MusicCard({super.key, required this.song});
@@ -99,7 +97,6 @@ class _MusicCardState extends State<MusicCard> {
 }
 
 class MyDrawer extends StatelessWidget {
-
   const MyDrawer({super.key});
   @override
   Widget build(BuildContext context) {
@@ -127,23 +124,26 @@ class MyDrawer extends StatelessWidget {
                 Icons.home,
                 size: 20,
               ),
-              onTap: () =>  Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const HomePage()))
+              //какой же кринж тут происходит
+              onTap: () => {
+                Scaffold.of(context).closeDrawer(),
+                Navigator.pop(context),
+                Navigator.pop(context)
+              },
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: ListTile(
-              title: const Text(
-                'Radio',
-                style: TextStyle(fontSize: 20),
-              ),
-              leading: const Icon(
-                Icons.radio,
-                size: 20,
-              ),
-              onTap: () =>  Navigator.of(context).pop()
-            ),
+                title: const Text(
+                  'Radio',
+                  style: TextStyle(fontSize: 20),
+                ),
+                leading: const Icon(
+                  Icons.radio,
+                  size: 20,
+                ),
+                onTap: () => Navigator.of(context).pop()),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -154,10 +154,14 @@ class MyDrawer extends StatelessWidget {
                     'Change theme',
                     style: TextStyle(fontSize: 20),
                   ),
-                   Switch(
-                       value: ThemeProvider.controllerOf(context).currentThemeId == 'dark' ? true: false,
-                       onChanged: ((value) =>
-                           ThemeProvider.controllerOf(context).nextTheme()),)
+                  Switch(
+                    value: ThemeProvider.controllerOf(context).currentThemeId ==
+                            'dark'
+                        ? true
+                        : false,
+                    onChanged: ((value) =>
+                        ThemeProvider.controllerOf(context).nextTheme()),
+                  )
                 ],
               ),
               leading: const Icon(
