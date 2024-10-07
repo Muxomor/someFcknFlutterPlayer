@@ -64,8 +64,8 @@ class _CurrentRadioState extends State<CurrentRadio> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   IconButton(
-                    onPressed: () {
-                      player.stop();
+                    onPressed: () async {
+                      await player.stop();
                       Navigator.pop(context);
                     },
                     icon: const Icon(Icons.arrow_back_outlined),

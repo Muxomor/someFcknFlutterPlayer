@@ -95,8 +95,8 @@ class _SongPageState extends State<SongPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    onPressed: () {
-                      player.stop();
+                    onPressed: () async {
+                      await player.stop();
                       Navigator.pop(context);
                     },
                     icon: const Icon(Icons.arrow_back_outlined),
