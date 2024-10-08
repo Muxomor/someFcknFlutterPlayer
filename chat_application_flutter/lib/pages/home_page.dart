@@ -7,6 +7,7 @@ import 'package:theme_provider/theme_provider.dart';
 import 'package:toast/toast.dart';
 
 List<Song> playlist = [];
+TextEditingController searchController = TextEditingController();
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,7 +17,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  TextEditingController searchController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     ToastContext().init(context);
@@ -50,32 +50,39 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       drawer: const MyDrawer(),
-      body: StreamBuilder(
-        stream: FirebaseFirestore.instance.collection('Songs').snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          } else {
-            var songs = snapshot.data!.docs
-                .map((doc) => Song(
-                      name: doc['Name'],
-                      author: doc['Author'],
-                      logo: doc['Logo'],
-                      file: doc['File'],
-                    ))
-                .toList();
-            return ListView.builder(
-              itemCount: songs.length,
-              itemBuilder: (context, index) {
-                return MusicCard(
-                  song: songs[index],
+      body: Column(
+        children: [
+          TrackNameSearchBar(),
+          StreamBuilder(
+            stream: FirebaseFirestore.instance.collection('Songs').where('Name', arrayContains: searchController.text)
+      .orderBy('Name').snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(
+                  child: CircularProgressIndicator(),
                 );
-              },
-            );
-          }
-        },
+              } else {
+                var songs = snapshot.data!.docs
+                    .map((doc) => Song(
+                          name: doc['Name'],
+                          author: doc['Author'],
+                          logo: doc['Logo'],
+                          file: doc['File'],
+                        ))
+                    .toList();
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: songs.length,
+                  itemBuilder: (context, index) {
+                    return MusicCard(
+                      song: songs[index],
+                    );
+                  },
+                );
+              }
+            },
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -132,35 +139,39 @@ class _MusicCardState extends State<MusicCard> {
   bool? isChecked = true;
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        leading: Image.network(
-          widget.song.logo.toString(),
-        ),
-        title: Text(widget.song.name.toString()),
-        subtitle: Text(widget.song.author.toString()),
-        trailing: Checkbox(
-            value: playlist.contains(widget.song),
-            onChanged: (bool? value) {
-              setState(() {
-                isChecked = value;
-              });
-              if (value!) {
-                playlist.add(widget.song);
-              } else {
-                playlist.remove(widget.song);
-              }
-            }),
-        onTap: () {
-          List<Song> localSong = [widget.song];
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => SongPage(
-                playlist: localSong,
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.11,
+      width: MediaQuery.of(context).size.width * 0.3,
+      child: Card(
+        child: ListTile(
+          leading: Image.network(
+            widget.song.logo.toString(),
+          ),
+          title: Text(widget.song.name.toString()),
+          subtitle: Text(widget.song.author.toString()),
+          trailing: Checkbox(
+              value: playlist.contains(widget.song),
+              onChanged: (bool? value) {
+                setState(() {
+                  isChecked = value;
+                });
+                if (value!) {
+                  playlist.add(widget.song);
+                } else {
+                  playlist.remove(widget.song);
+                }
+              }),
+          onTap: () {
+            List<Song> localSong = [widget.song];
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => SongPage(
+                  playlist: localSong,
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -238,6 +249,35 @@ class MyDrawer extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class TrackNameSearchBar extends StatefulWidget {
+  const TrackNameSearchBar({super.key});
+
+  @override
+  State<TrackNameSearchBar> createState() => TrackNameSearchBarState();
+}
+
+class TrackNameSearchBarState extends State<TrackNameSearchBar> {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * 0.09,
+        width: MediaQuery.of(context).size.width * 0.86,
+        child: SearchBar(
+          //controller: searchController,
+          onChanged: (value) {
+            setState(() {
+              searchController.text = value;
+            });
+          },
+          hintText: 'Hint: Search by name of the song',
+        ),
       ),
     );
   }

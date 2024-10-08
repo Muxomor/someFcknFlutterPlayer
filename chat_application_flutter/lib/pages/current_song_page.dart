@@ -75,6 +75,7 @@ class _SongPageState extends State<SongPage> {
     // }
     //устанавливаем источник аудио
     player.setAudioSource(_playlist);
+    player.load();
 
     
   }
