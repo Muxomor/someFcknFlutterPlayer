@@ -8,6 +8,8 @@ import 'package:toast/toast.dart';
 
 List<Song> playlist = [];
 TextEditingController searchController = TextEditingController();
+List<Song> allSongs = [];
+List<Song> displayedList = [];
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -52,10 +54,10 @@ class _HomePageState extends State<HomePage> {
       drawer: const MyDrawer(),
       body: Column(
         children: [
-          TrackNameSearchBar(),
           StreamBuilder(
-            stream: FirebaseFirestore.instance.collection('Songs').where('Name', arrayContains: searchController.text)
-      .orderBy('Name').snapshots(),
+            stream: FirebaseFirestore.instance
+                .collection('Songs')
+                .snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return const Center(
@@ -70,15 +72,18 @@ class _HomePageState extends State<HomePage> {
                           file: doc['File'],
                         ))
                     .toList();
-                return ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: songs.length,
-                  itemBuilder: (context, index) {
-                    return MusicCard(
-                      song: songs[index],
-                    );
-                  },
-                );
+                allSongs = songs;
+                displayedList = songs;
+                // return ListView.builder(
+                //   shrinkWrap: true,
+                //   itemCount: displayedList.length,
+                //   itemBuilder: (context, index) {
+                //     return MusicCard(
+                //       song: displayedList[index],
+                //     );
+                //   },
+                // );
+                return TrackNameSearchBar();
               }
             },
           ),
@@ -262,23 +267,60 @@ class TrackNameSearchBar extends StatefulWidget {
 }
 
 class TrackNameSearchBarState extends State<TrackNameSearchBar> {
+
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    searchController.addListener((){
+      setState(() {
+        filterSongs();
+      });
+    });
+  }
+
+  void filterSongs(){
+    String query = searchController.text.toLowerCase();
+    displayedList = allSongs.where((song){return song.name!.toLowerCase().contains(query);}).toList(); 
+  }
+
+   @override
+  void dispose() {
+    searchController.dispose(); 
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: SizedBox(
-        height: MediaQuery.of(context).size.height * 0.09,
-        width: MediaQuery.of(context).size.width * 0.86,
-        child: SearchBar(
-          //controller: searchController,
-          onChanged: (value) {
-            setState(() {
-              searchController.text = value;
-            });
-          },
-          hintText: 'Hint: Search by name of the song',
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SizedBox(
+                    // height: MediaQuery.of(context).size.height * 0.09,
+    // width: MediaQuery.of(context).size.width * 0.86,
+            child: SearchBar(
+              
+              controller: searchController,
+              // onChanged: (value) {
+              //   setState(() {
+              //     searchController.text = value;
+              //   });
+              // },
+              hintText: 'Hint: Search by name of the song',
+            ),
+          ),
         ),
-      ),
+        ListView.builder(
+              shrinkWrap: true,
+              itemCount: displayedList.length,
+              itemBuilder: (context, index) {
+                return MusicCard(
+                  song: displayedList[index],
+                );
+              },
+            ),
+      ],
     );
   }
 }
