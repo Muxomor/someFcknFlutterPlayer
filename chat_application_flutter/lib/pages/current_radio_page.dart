@@ -19,10 +19,9 @@ class _CurrentRadioState extends State<CurrentRadio> {
   final player = AudioPlayer();
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
      List<AudioSource> sources = [];
-     var _playlist;
+     ConcatenatingAudioSource playlist;
      //добавление в фоновый плейлист через цикл
       for (Song item in widget.playlist) {
         sources.add(
@@ -40,10 +39,10 @@ class _CurrentRadioState extends State<CurrentRadio> {
         );
       }
       //заполнение источников для фона из массива
-      _playlist = ConcatenatingAudioSource(children: sources);
+      playlist = ConcatenatingAudioSource(children: sources);
     // }
     //устанавливаем источник аудио
-    player.setAudioSource(_playlist);
+    player.setAudioSource(playlist);
 
     
   }
@@ -86,8 +85,8 @@ class _CurrentRadioState extends State<CurrentRadio> {
                         final metadata = state!.currentSource!.tag as MediaItem;
                         return MediaMetadata(
                           logoLink: metadata.artUri.toString(),
-                          name:"Радиостанция: "+ metadata.title,
-                          author: "Жанр: "+ metadata.artist.toString(),
+                          name:"Радиостанция: ${metadata.title}",
+                          author: "Жанр: ${metadata.artist}",
                         );
                       },
                     ),

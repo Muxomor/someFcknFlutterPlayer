@@ -1,17 +1,17 @@
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:chat_application_flutter/components/Song.dart';
 import 'package:chat_application_flutter/components/photo_box.dart';
+import 'package:chat_application_flutter/pages/home_page.dart';
+import 'package:chat_application_flutter/pages/playlist_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:toast/toast.dart';
 
 class SongPage extends StatefulWidget {
-
   final List<Song> playlist;
-  const SongPage(
-      {super.key,
-      required this.playlist});
+  const SongPage({super.key, required this.playlist});
 
   @override
   State<SongPage> createState() => _SongPageState();
@@ -34,13 +34,12 @@ class _SongPageState extends State<SongPage> {
           duration ?? Duration.zero,
         ),
       );
-      
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-     List<AudioSource> sources = [];
-     var _playlist;
+    List<AudioSource> sources = [];
+    ConcatenatingAudioSource playlist;
     // if (playlist.first == []) {
     //   final _playlist = ConcatenatingAudioSource(children: [
     //     AudioSource.uri(
@@ -55,34 +54,33 @@ class _SongPageState extends State<SongPage> {
     //   ]);
     // } else {
     //   //добавление в фоновый плейлист через цикл
-      for (Song item in widget.playlist) {
-        sources.add(
-          AudioSource.uri(
-            Uri.parse(item.file.toString()),
-            tag: MediaItem(
-              id: item.name.toString(),
-              title: item.name.toString(),
-              artist: item.author.toString(),
-              artUri: Uri.parse(
-                item.logo.toString(),
-              ),
+    for (Song item in widget.playlist) {
+      sources.add(
+        AudioSource.uri(
+          Uri.parse(item.file.toString()),
+          tag: MediaItem(
+            id: item.name.toString(),
+            title: item.name.toString(),
+            artist: item.author.toString(),
+            artUri: Uri.parse(
+              item.logo.toString(),
             ),
           ),
-        );
-      }
-      //заполнение источников для фона из массива
-      _playlist = ConcatenatingAudioSource(children: sources);
+        ),
+      );
+    }
+    //заполнение источников для фона из массива
+    playlist = ConcatenatingAudioSource(children: sources);
     // }
     //устанавливаем источник аудио
-    player.setAudioSource(_playlist);
+    player.setAudioSource(playlist);
     player.load();
-
-    
   }
 
   @override
   Widget build(BuildContext context) {
     //player.setLoopMode(LoopMode.all);
+        ToastContext().init(context);
     return Scaffold(
       // ignore: deprecated_member_use
       backgroundColor: Theme.of(context).colorScheme.background,
@@ -104,7 +102,18 @@ class _SongPageState extends State<SongPage> {
                   ),
                   const Text('Player'),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      if (playlist.length == 1) {
+                        //TODO: придумай че сюда написать нормальное
+                          Toast.show('There is no available songs in your playlist');
+                      } else {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (context) => PlaylistControlPage(
+                                  playlist: playlist, player: player)),
+                        );
+                      }
+                    },
                     icon: const Icon(Icons.menu),
                   ),
                 ],
@@ -148,18 +157,15 @@ class _SongPageState extends State<SongPage> {
                                 onPressed: () async {
                                   if (player.loopMode == LoopMode.all) {
                                     await player.setLoopMode(LoopMode.one);
-                                    setState(()  {
-                                      
+                                    setState(() {
                                       isOnRepeat = !isOnRepeat;
                                     });
-                                  } else if(player.loopMode == LoopMode.one){
+                                  } else if (player.loopMode == LoopMode.one) {
                                     await player.setLoopMode(LoopMode.all);
-                                    setState(()  {
-                                      
+                                    setState(() {
                                       isOnRepeat = !isOnRepeat;
                                     });
-                                  }
-                                  else{
+                                  } else {
                                     await player.setLoopMode(LoopMode.all);
                                   }
                                 },
@@ -188,7 +194,7 @@ class _SongPageState extends State<SongPage> {
                         Row(
                           children: [
                             Expanded(
-                              //seek -30
+                                //seek -30
                                 child: PhotoBox(
                                     child: IconButton(
                               icon: const Icon(Icons.replay_30),
@@ -231,7 +237,7 @@ class _SongPageState extends State<SongPage> {
                               width: 20,
                             ),
                             Expanded(
-                              //seek +30
+                                //seek +30
                                 child: PhotoBox(
                                     child: IconButton(
                               icon: const Icon(Icons.forward_30),
@@ -256,6 +262,7 @@ class _SongPageState extends State<SongPage> {
     );
   }
 }
+
 //for progress bar(deez nuts)
 class PositionData {
   const PositionData(this.position, this.bufferedPosition, this.duration);
@@ -263,7 +270,6 @@ class PositionData {
   final Duration bufferedPosition;
   final Duration duration;
 }
-
 
 //for current track name, author,logo
 class MediaMetadata extends StatelessWidget {

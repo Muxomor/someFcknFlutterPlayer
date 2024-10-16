@@ -27,11 +27,10 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: const Text('Deez Nuts'),
-        //TODO: implements search bar you fucking moron
         actions: [
           IconButton(
             onPressed: () async {
-              if (playlist.length == 0) {
+              if (playlist.isEmpty) {
                 Toast.show(
                     'Для начала работы выберите один или более треков из треклиста');
               } else {
@@ -55,9 +54,7 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         children: [
           StreamBuilder(
-            stream: FirebaseFirestore.instance
-                .collection('Songs')
-                .snapshots(),
+            stream: FirebaseFirestore.instance.collection('Songs').snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return const Center(
@@ -74,15 +71,6 @@ class _HomePageState extends State<HomePage> {
                     .toList();
                 allSongs = songs;
                 displayedList = songs;
-                // return ListView.builder(
-                //   shrinkWrap: true,
-                //   itemCount: displayedList.length,
-                //   itemBuilder: (context, index) {
-                //     return MusicCard(
-                //       song: displayedList[index],
-                //     );
-                //   },
-                // );
                 return TrackNameSearchBar();
               }
             },
@@ -267,26 +255,28 @@ class TrackNameSearchBar extends StatefulWidget {
 }
 
 class TrackNameSearchBarState extends State<TrackNameSearchBar> {
-
-@override
+  @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    searchController.addListener((){
+    //listener for controller initializing
+    searchController.addListener(() {
       setState(() {
         filterSongs();
       });
     });
   }
 
-  void filterSongs(){
+  //filtering
+  void filterSongs() {
     String query = searchController.text.toLowerCase();
-    displayedList = allSongs.where((song){return song.name!.toLowerCase().contains(query);}).toList(); 
+    displayedList = allSongs.where((song) {
+      return song.name!.toLowerCase().contains(query);
+    }).toList();
   }
 
-   @override
+  @override
   void dispose() {
-    searchController.dispose(); 
+    searchController.dispose(); //dispose for cleaning some shit
     super.dispose();
   }
 
@@ -297,29 +287,21 @@ class TrackNameSearchBarState extends State<TrackNameSearchBar> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: SizedBox(
-                    // height: MediaQuery.of(context).size.height * 0.09,
-    // width: MediaQuery.of(context).size.width * 0.86,
             child: SearchBar(
-              
               controller: searchController,
-              // onChanged: (value) {
-              //   setState(() {
-              //     searchController.text = value;
-              //   });
-              // },
               hintText: 'Hint: Search by name of the song',
             ),
           ),
         ),
         ListView.builder(
-              shrinkWrap: true,
-              itemCount: displayedList.length,
-              itemBuilder: (context, index) {
-                return MusicCard(
-                  song: displayedList[index],
-                );
-              },
-            ),
+          shrinkWrap: true,
+          itemCount: displayedList.length,
+          itemBuilder: (context, index) {
+            return MusicCard(
+              song: displayedList[index],
+            );
+          },
+        ),
       ],
     );
   }
