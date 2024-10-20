@@ -7,46 +7,43 @@ import 'package:just_audio/just_audio.dart';
 
 class CurrentRadio extends StatefulWidget {
   final List<Song> playlist;
-  
+
   const CurrentRadio({super.key, required this.playlist});
 
   @override
   State<CurrentRadio> createState() => _CurrentRadioState();
 }
 
-
 class _CurrentRadioState extends State<CurrentRadio> {
   final player = AudioPlayer();
   @override
   void initState() {
     super.initState();
-     List<AudioSource> sources = [];
-     ConcatenatingAudioSource playlist;
-     //добавление в фоновый плейлист через цикл
-      for (Song item in widget.playlist) {
-        sources.add(
-          AudioSource.uri(
-            Uri.parse(item.file.toString()),
-            tag: MediaItem(
-              id: item.name.toString(),
-              title: item.name.toString(),
-              artist: item.author.toString(),
-              artUri: Uri.parse(
-                item.logo.toString(),
-              ),
+    List<AudioSource> sources = [];
+    ConcatenatingAudioSource playlist;
+    //добавление в фоновый плейлист через цикл
+    for (Song item in widget.playlist) {
+      sources.add(
+        AudioSource.uri(
+          Uri.parse(item.file.toString()),
+          tag: MediaItem(
+            id: item.name.toString(),
+            title: item.name.toString(),
+            artist: item.author.toString(),
+            artUri: Uri.parse(
+              item.logo.toString(),
             ),
           ),
-        );
-      }
-      //заполнение источников для фона из массива
-      playlist = ConcatenatingAudioSource(children: sources);
+        ),
+      );
+    }
+    //заполнение источников для фона из массива
+    playlist = ConcatenatingAudioSource(children: sources);
     // }
     //устанавливаем источник аудио
     player.setAudioSource(playlist);
-
-    
   }
-  
+
   @override
   Widget build(BuildContext context) {
     player.setLoopMode(LoopMode.one);
@@ -85,7 +82,7 @@ class _CurrentRadioState extends State<CurrentRadio> {
                         final metadata = state!.currentSource!.tag as MediaItem;
                         return MediaMetadata(
                           logoLink: metadata.artUri.toString(),
-                          name:"Радиостанция: ${metadata.title}",
+                          name: "Радиостанция: ${metadata.title}",
                           author: "Жанр: ${metadata.artist}",
                         );
                       },
@@ -102,7 +99,7 @@ class _CurrentRadioState extends State<CurrentRadio> {
                     padding: const EdgeInsets.symmetric(horizontal: 25),
                     child: Column(
                       children: [
-                        //instruments, repeat, shuffle, etc...                      
+                        //instruments, repeat, shuffle, etc...
                         Center(
                           child: PhotoBox(
                             child: StreamBuilder<PlayerState>(

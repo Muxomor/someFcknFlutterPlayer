@@ -1,4 +1,5 @@
 import 'package:chat_application_flutter/components/Song.dart';
+import 'package:chat_application_flutter/pages/create_playlist_page.dart';
 import 'package:chat_application_flutter/pages/current_song_page.dart';
 import 'package:chat_application_flutter/pages/radios_page.dart';
 import 'package:flutter/material.dart';
@@ -89,36 +90,36 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-Widget musicCards(BuildContext context, Song song) {
-  return Card(
-    child: ListTile(
-      leading: Image.network(
-        song.logo.toString(),
-      ),
-      title: Text(song.name.toString()),
-      subtitle: Text(song.author.toString()),
-      trailing: const Icon(
-        Icons.play_arrow,
-        size: 20,
-      ),
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => SongPage(
-              playlist: [
-                Song(
-                    author: song.author,
-                    file: song.file,
-                    logo: song.logo,
-                    name: song.name)
-              ],
-            ),
-          ),
-        );
-      },
-    ),
-  );
-}
+// Widget musicCards(BuildContext context, Song song) {
+//   return Card(
+//     child: ListTile(
+//       leading: Image.network(
+//         song.logo.toString(),
+//       ),
+//       title: Text(song.name.toString()),
+//       subtitle: Text(song.author.toString()),
+//       trailing: const Icon(
+//         Icons.play_arrow,
+//         size: 20,
+//       ),
+//       onTap: () {
+//         Navigator.of(context).push(
+//           MaterialPageRoute(
+//             builder: (context) => SongPage(
+//               playlist: [
+//                 Song(
+//                     author: song.author,
+//                     file: song.file,
+//                     logo: song.logo,
+//                     name: song.name)
+//               ],
+//             ),
+//           ),
+//         );
+//       },
+//     ),
+//   );
+// }
 
 class MusicCard extends StatefulWidget {
   final Song song;
@@ -214,6 +215,18 @@ class MyDrawer extends StatelessWidget {
                 ),
                 onTap: () => Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => const RadioPage()))),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListTile(
+              title: const Text(
+                'Плейлисты',
+                style: TextStyle(fontSize: 20),
+              ),
+              leading: const Icon(Icons.playlist_play),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const SwipablePage())),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),

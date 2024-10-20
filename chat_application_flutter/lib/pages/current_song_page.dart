@@ -80,7 +80,7 @@ class _SongPageState extends State<SongPage> {
   @override
   Widget build(BuildContext context) {
     //player.setLoopMode(LoopMode.all);
-        ToastContext().init(context);
+    ToastContext().init(context);
     return Scaffold(
       // ignore: deprecated_member_use
       backgroundColor: Theme.of(context).colorScheme.background,
@@ -105,7 +105,8 @@ class _SongPageState extends State<SongPage> {
                     onPressed: () {
                       if (playlist.length == 1) {
                         //TODO: придумай че сюда написать нормальное
-                          Toast.show('There is no available songs in your playlist');
+                        Toast.show(
+                            'There is no available songs in your playlist');
                       } else {
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -154,24 +155,25 @@ class _SongPageState extends State<SongPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             IconButton(
-                                onPressed: () async {
-                                  if (player.loopMode == LoopMode.all) {
-                                    await player.setLoopMode(LoopMode.one);
-                                    setState(() {
-                                      isOnRepeat = !isOnRepeat;
-                                    });
-                                  } else if (player.loopMode == LoopMode.one) {
-                                    await player.setLoopMode(LoopMode.all);
-                                    setState(() {
-                                      isOnRepeat = !isOnRepeat;
-                                    });
-                                  } else {
-                                    await player.setLoopMode(LoopMode.all);
-                                  }
-                                },
-                                icon: !isOnRepeat
-                                    ? const Icon(Icons.repeat)
-                                    : const Icon(Icons.repeat_one)),
+                              onPressed: () async {
+                                if (player.loopMode == LoopMode.all) {
+                                  await player.setLoopMode(LoopMode.one);
+                                  setState(() {
+                                    isOnRepeat = !isOnRepeat;
+                                  });
+                                } else if (player.loopMode == LoopMode.one) {
+                                  await player.setLoopMode(LoopMode.all);
+                                  setState(() {
+                                    isOnRepeat = !isOnRepeat;
+                                  });
+                                } else {
+                                  await player.setLoopMode(LoopMode.all);
+                                }
+                              },
+                              icon: !isOnRepeat
+                                  ? const Icon(Icons.repeat)
+                                  : const Icon(Icons.repeat_one),
+                            ),
                           ],
                         ),
                         //progress bar for current track
@@ -194,15 +196,20 @@ class _SongPageState extends State<SongPage> {
                         Row(
                           children: [
                             Expanded(
-                                //seek -30
-                                child: PhotoBox(
-                                    child: IconButton(
-                              icon: const Icon(Icons.replay_30),
-                              onPressed: () {
-                                player.seek(Duration(
-                                    seconds: player.position.inSeconds - 30));
-                              },
-                            ))),
+                              //seek -30
+                              child: PhotoBox(
+                                child: IconButton(
+                                  icon: const Icon(Icons.replay_30),
+                                  onPressed: () {
+                                    player.seek(
+                                      Duration(
+                                          seconds:
+                                              player.position.inSeconds - 30),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
                             const SizedBox(
                               width: 20,
                             ),
@@ -211,43 +218,47 @@ class _SongPageState extends State<SongPage> {
                               //play pause button
                               child: PhotoBox(
                                 child: StreamBuilder<PlayerState>(
-                                    stream: player.playerStateStream,
-                                    builder: (context, snapshot) {
-                                      final playerState = snapshot.data;
-                                      final processtingState =
-                                          playerState?.processingState;
-                                      final playing = playerState?.playing;
-                                      if (!(playing ?? false)) {
-                                        return IconButton(
-                                          onPressed: player.play,
-                                          icon: const Icon(Icons.play_arrow),
-                                        );
-                                      } else if (processtingState !=
-                                          ProcessingState.completed) {
-                                        return IconButton(
-                                          onPressed: player.pause,
-                                          icon: const Icon(Icons.pause),
-                                        );
-                                      }
-                                      return const Icon(Icons.play_arrow);
-                                    }),
+                                  stream: player.playerStateStream,
+                                  builder: (context, snapshot) {
+                                    final playerState = snapshot.data;
+                                    final processtingState =
+                                        playerState?.processingState;
+                                    final playing = playerState?.playing;
+                                    if (!(playing ?? false)) {
+                                      return IconButton(
+                                        onPressed: player.play,
+                                        icon: const Icon(Icons.play_arrow),
+                                      );
+                                    } else if (processtingState !=
+                                        ProcessingState.completed) {
+                                      return IconButton(
+                                        onPressed: player.pause,
+                                        icon: const Icon(Icons.pause),
+                                      );
+                                    }
+                                    return const Icon(Icons.play_arrow);
+                                  },
+                                ),
                               ),
                             ),
                             const SizedBox(
                               width: 20,
                             ),
                             Expanded(
-                                //seek +30
-                                child: PhotoBox(
-                                    child: IconButton(
-                              icon: const Icon(Icons.forward_30),
-                              onPressed: () async => {
-                                await player.seek(
-                                  Duration(
-                                      seconds: player.position.inSeconds + 30),
+                              //seek +30
+                              child: PhotoBox(
+                                child: IconButton(
+                                  icon: const Icon(Icons.forward_30),
+                                  onPressed: () async => {
+                                    await player.seek(
+                                      Duration(
+                                          seconds:
+                                              player.position.inSeconds + 30),
+                                    ),
+                                  },
                                 ),
-                              },
-                            )))
+                              ),
+                            )
                           ],
                         )
                       ],

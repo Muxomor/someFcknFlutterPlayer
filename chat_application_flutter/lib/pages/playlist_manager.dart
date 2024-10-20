@@ -49,10 +49,13 @@ class _PlaylistControlPageState extends State<PlaylistControlPage> {
               itemCount: playlist.length,
               itemBuilder: (context, index) {
                 //обернуто в InheritedWidget для получения AudioPlayer в MusicCard
-                return CurrentAudioPlayer(player: widget.player, child: MusicCard(
-                  song: playlist[index],
-                  index: index,
-                ),); 
+                return CurrentAudioPlayer(
+                  player: widget.player,
+                  child: MusicCard(
+                    song: playlist[index],
+                    index: index,
+                  ),
+                );
               },
             ),
           ],
@@ -94,7 +97,11 @@ class _MusicCardState extends State<MusicCard> {
                 ),
                 title: Text(widget.song.name.toString()),
                 subtitle: Text(widget.song.author.toString()),
-                onTap: () {CurrentAudioPlayer.of(context)?.player.seek(Duration.zero,index: widget.index);},
+                onTap: () {
+                  CurrentAudioPlayer.of(context)
+                      ?.player
+                      .seek(Duration.zero, index: widget.index);
+                },
               ),
             ),
           ),
@@ -103,7 +110,6 @@ class _MusicCardState extends State<MusicCard> {
     );
   }
 }
-
 
 //current source title listener
 void _listenForChangesInSequenceState(AudioPlayer player) {
@@ -114,9 +120,8 @@ void _listenForChangesInSequenceState(AudioPlayer player) {
     final currentItem = sequenceState.currentSource?.tag as MediaItem;
     final title = currentItem.title;
     currentSongTitleNotifier.value = title;
-  });
+  },);
 }
-
 
 //доступ к плееру
 class CurrentAudioPlayer extends InheritedWidget {
