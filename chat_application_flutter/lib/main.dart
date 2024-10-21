@@ -14,6 +14,7 @@ void main() async {
         apiKey: 'AIzaSyAFk3EKtxrjQx3s6G84w6kUHU4_8t0s2fk',
         appId: '1:1096003489828:android:a39dc04891c2de82de88b1',
         messagingSenderId: '1096003489828',
+        storageBucket: 'some-shitty-chat-app.appspot.com',
         projectId: 'some-shitty-chat-app'),
   );
   await JustAudioBackground.init(

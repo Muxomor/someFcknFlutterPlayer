@@ -1,7 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:chat_application_flutter/components/Song.dart';
+import 'package:chat_application_flutter/components/photo_box.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:toast/toast.dart';
@@ -9,7 +12,7 @@ import 'package:toast/toast.dart';
 final List<Song> playlist = [];
 List<Song> allSongs = [];
 List<Song> displayedList = [];
- File? fileName;
+File? fileName;
 
 class SwipablePage extends StatefulWidget {
   const SwipablePage({super.key});
@@ -86,6 +89,7 @@ class _SongsSelectionPageState extends State<SongsSelectionPage> {
               SizedBox(
                 width: MediaQuery.of(context).size.width * 0.45,
                 child: FloatingActionButton.extended(
+                  heroTag: null,
                   onPressed: () {
                     if (playlist.isEmpty) {
                       Toast.show(
@@ -127,11 +131,59 @@ class _PlaylistParametersPageState extends State<PlaylistParametersPage> {
   selectImageFromGallery() async {
     final returnedimage =
         await ImagePicker().pickImage(source: ImageSource.gallery);
-    setState(() {
-      _fileName = returnedimage;
-      _selectedFile = File(returnedimage!.path);
-      fileName = _selectedFile!;
-    });
+    if (returnedimage == null) {
+      return;
+    } else {
+      setState(() {
+        _fileName = returnedimage;
+        _selectedFile = File(returnedimage.path);
+        fileName = _selectedFile!;
+      });
+    }
+  }
+
+  Future<String> pushImageToStorage(XFile file) async {
+    try {
+      final path = 'playlistsLogo/${file.name}${DateTime.now()}';
+      Reference storageRef = FirebaseStorage.instance.ref().child(path);
+      UploadTask task = storageRef.putFile(File(file.path));
+      TaskSnapshot taskSnapshot = await task.whenComplete(() => null);
+      String url = await taskSnapshot.ref.getDownloadURL();
+      return url;
+    } catch (e) {
+      Toast.show('Some error has occured!$e');
+      return 'error';
+    }
+  }
+
+  Future<String> pushNewPlaylistToFirestore(String name, String playlistInJson,
+      String description, String playlistLogoUrl) async {
+    try {
+      await FirebaseFirestore.instance.collection('Playlist').add({
+        'Description': description,
+        'Logo': playlistLogoUrl,
+        'Name': name,
+        'Playlist': playlistInJson
+      });
+      Toast.show('Плейлист загружен');
+      return 'Succes';
+    } catch (e) {
+      Toast.show('Произошла ошибка при загрузке прлейлиста в сеть. Проверьте своей интернет подключение и/или попробуйте позже!');
+      return 'error';
+    }
+  }
+
+//List<Song> в JSON
+  String songsToJson(List<Song> songs) {
+    List<Map<String, dynamic>> songsMap =
+        songs.map((song) => song.toJson()).toList();
+    return jsonEncode(songsMap);
+  }
+
+//JSON в List<Song>
+  List<Song> songsFromJson(String jsonString) {
+    final List<dynamic> jsonData = jsonDecode(jsonString);
+    return jsonData.map((item) => Song.fromJson(item)).toList();
   }
 
   @override
@@ -142,26 +194,34 @@ class _PlaylistParametersPageState extends State<PlaylistParametersPage> {
         body: Column(
           children: [
             Center(
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.4,
-                    width: MediaQuery.of(context).size.width * 0.4,
-                    child: GestureDetector(
-                      onTap: () async {
-                        await selectImageFromGallery();
-                      },
-                      child: _selectedFile == null && fileName==null
-                          ? Image.network(
-                              playlist[0].logo.toString(),
-                            )
-                          : Image.file(fileName!),
+              child: PhotoBox(
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.3,
+                      width: MediaQuery.of(context).size.width * 0.5,
+                      child: GestureDetector(
+                        onTap: () async {
+                          await selectImageFromGallery();
+                        },
+                        child: _selectedFile == null && fileName == null
+                            ? Image.network(
+                                playlist[0].logo.toString(),
+                              )
+                            : Image.file(fileName!),
+                      ),
                     ),
-                  ),
-                  Text(
-                      'В случае если вы не предоставите своё изображение, для плейлиста будет использовано изображение из первой композиции в списке.'),
-                ],
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width*0.7,
+                      child: Text(
+                          'В случае если вы не предоставите своё изображение, для плейлиста будет использовано изображение из первой композиции в списке.'),
+                    ),
+                  ],
+                ),
               ),
+            ),
+            SizedBox(
+              height: MediaQuery.of(context).size.height*0.03,
             ),
             TextField(
               controller: playlistNameController,
@@ -181,38 +241,92 @@ class _PlaylistParametersPageState extends State<PlaylistParametersPage> {
                     icon: Icon(Icons.description))),
           ],
         ),
-        floatingActionButton: Padding(
-          padding: const EdgeInsets.only(bottom: 10.0, left: 15),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.45,
-                  child: FloatingActionButton.extended(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    label: Text('Назад'),
-                    icon: Icon(Icons.cancel),
-                  )),
-              const SizedBox(
-                width: 20,
-              ),
-              SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.45,
-                  child: FloatingActionButton.extended(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                const PlaylistParametersPage()),
-                      );
-                    },
-                    label: Text('Сохранить'),
-                    icon: Icon(Icons.done),
-                  )),
-            ],
+        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        floatingActionButton: Visibility(
+          visible: MediaQuery.of(context).viewInsets.bottom==0.0,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 10.0, left: 15),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.45,
+                    child: FloatingActionButton.extended(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      label: Text('Назад'),
+                      icon: Icon(Icons.cancel),
+                    )),
+                const SizedBox(
+                  width: 20,
+                ),
+                SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.45,
+                    child: FloatingActionButton.extended(
+                      heroTag: null,
+                      onPressed: () async {
+                        if (playlistNameController.text == '' &&
+                            playlistDescController.text == '') {
+                          Toast.show(
+                              'Для продолженния введите название и/или описание плейлиста!');
+                        } else {
+                          String jsonPlaylist = songsToJson(playlist);
+                          if (fileName == null) {
+                            String imgUrl = playlist[0].logo.toString();
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              },
+                            );
+                            await pushNewPlaylistToFirestore(
+                                playlistNameController.text,
+                                jsonPlaylist,
+                                playlistDescController.text,
+                                imgUrl);
+                                Navigator.pop(context);
+                          }
+                          else{
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              },
+                            );
+                            String imgUrl = await pushImageToStorage(_fileName!);
+                            if(imgUrl=='error'){
+                              Navigator.pop(context);
+                              Toast.show('Произошла ошибка при загрузке изображения! Попробуйте позже и/или проверьте свое интернет соединение!');
+                            }
+                            else{
+                              String answer = await pushNewPlaylistToFirestore(playlistNameController.text, jsonPlaylist, playlistDescController.text, imgUrl);
+                              if(answer=='error'){
+                                Navigator.pop(context);
+                              }
+                              else{
+                                Navigator.pop(context);
+                                //тут навигация типа понял да
+                              }
+                            }
+                          }
+                        }
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //       builder: (context) =>
+                        //           const PlaylistParametersPage()),
+                        //);
+                      },
+                      label: Text('Сохранить'),
+                      icon: Icon(Icons.done),
+                    )),
+              ],
+            ),
           ),
         ),
       ),
