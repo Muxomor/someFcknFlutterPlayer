@@ -46,13 +46,13 @@ class _PlaylistControlPageState extends State<PlaylistControlPage> {
             ),
             ListView.builder(
               shrinkWrap: true,
-              itemCount: playlist.length,
+              itemCount: widget.playlist.length,
               itemBuilder: (context, index) {
                 //обернуто в InheritedWidget для получения AudioPlayer в MusicCard
                 return CurrentAudioPlayer(
                   player: widget.player,
                   child: MusicCard(
-                    song: playlist[index],
+                    song: widget.playlist[index],
                     index: index,
                   ),
                 );

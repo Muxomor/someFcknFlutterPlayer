@@ -1,6 +1,7 @@
 import 'package:chat_application_flutter/components/Song.dart';
 import 'package:chat_application_flutter/pages/create_playlist_page.dart';
 import 'package:chat_application_flutter/pages/current_song_page.dart';
+import 'package:chat_application_flutter/pages/playlist_viewer_page.dart';
 import 'package:chat_application_flutter/pages/radios_page.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -225,7 +226,7 @@ class MyDrawer extends StatelessWidget {
               ),
               leading: const Icon(Icons.playlist_play),
               onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const SwipablePage())),
+                  builder: (context) => const PlaylistView())),
             ),
           ),
           Padding(
@@ -273,9 +274,10 @@ class TrackNameSearchBarState extends State<TrackNameSearchBar> {
     super.initState();
     //listener for controller initializing
     searchController.addListener(() {
+      if(mounted){
       setState(() {
         filterSongs();
-      });
+      });}
     });
   }
 
@@ -287,11 +289,11 @@ class TrackNameSearchBarState extends State<TrackNameSearchBar> {
     }).toList();
   }
 
-  @override
-  void dispose() {
-    searchController.dispose(); //dispose for cleaning some shit
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   searchController.dispose(); //dispose for cleaning some shit
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {

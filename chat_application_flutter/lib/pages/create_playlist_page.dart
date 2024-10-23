@@ -1,15 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:chat_application_flutter/components/Playlist.dart';
 import 'package:chat_application_flutter/components/Song.dart';
 import 'package:chat_application_flutter/components/photo_box.dart';
+import 'package:chat_application_flutter/pages/playlist_viewer_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:toast/toast.dart';
 
-final List<Song> playlist = [];
+List<Song> playlist = [];
 List<Song> allSongs = [];
 List<Song> displayedList = [];
 File? fileName;
@@ -29,13 +30,27 @@ class _SwipablePageState extends State<SwipablePage> {
 }
 
 class SongsSelectionPage extends StatefulWidget {
-  const SongsSelectionPage({super.key});
+  final Playlist? playlist; // Accept an optional Playlist object
+
+  const SongsSelectionPage({super.key, this.playlist});
 
   @override
   State<SongsSelectionPage> createState() => _SongsSelectionPageState();
 }
 
 class _SongsSelectionPageState extends State<SongsSelectionPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.playlist != null) {
+      setState(() {
+        playlist.clear();
+        playlist.addAll(songsFromJson(widget.playlist!.playlistInJson));
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -52,17 +67,16 @@ class _SongsSelectionPageState extends State<SongsSelectionPage> {
                   );
                 } else {
                   var songs = snapshot.data!.docs
-                      .map(
-                        (doc) => Song(
-                          name: doc['Name'],
-                          author: doc['Author'],
-                          logo: doc['Logo'],
-                          file: doc['File'],
-                        ),
-                      )
+                      .map((doc) => Song(
+                            name: doc['Name'],
+                            author: doc['Author'],
+                            logo: doc['Logo'],
+                            file: doc['File'],
+                          ))
                       .toList();
                   allSongs = songs;
                   displayedList = songs;
+
                   return TrackNameSearchBar();
                 }
               },
@@ -75,17 +89,17 @@ class _SongsSelectionPageState extends State<SongsSelectionPage> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.45,
-                  child: FloatingActionButton.extended(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    label: Text('Отменить'),
-                    icon: Icon(Icons.cancel),
-                  )),
-              const SizedBox(
-                width: 20,
+                width: MediaQuery.of(context).size.width * 0.45,
+                child: FloatingActionButton.extended(
+                  heroTag: null,
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  label: Text('Отменить'),
+                  icon: Icon(Icons.cancel),
+                ),
               ),
+              const SizedBox(width: 20),
               SizedBox(
                 width: MediaQuery.of(context).size.width * 0.45,
                 child: FloatingActionButton.extended(
@@ -98,7 +112,9 @@ class _SongsSelectionPageState extends State<SongsSelectionPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const PlaylistParametersPage(),
+                          builder: (context) => PlaylistParametersPage(
+                            playlist: widget.playlist,
+                          ),
                         ),
                       );
                     }
@@ -116,7 +132,9 @@ class _SongsSelectionPageState extends State<SongsSelectionPage> {
 }
 
 class PlaylistParametersPage extends StatefulWidget {
-  const PlaylistParametersPage({super.key});
+  final Playlist? playlist; // Accept an optional Playlist object
+
+  const PlaylistParametersPage({super.key, this.playlist});
 
   @override
   State<PlaylistParametersPage> createState() => _PlaylistParametersPageState();
@@ -124,9 +142,82 @@ class PlaylistParametersPage extends StatefulWidget {
 
 class _PlaylistParametersPageState extends State<PlaylistParametersPage> {
   File? _selectedFile;
+
   XFile? _fileName;
+
   TextEditingController playlistNameController = TextEditingController();
+
   TextEditingController playlistDescController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.playlist != null) {
+      playlistNameController.text = widget.playlist!.playlistName;
+
+      playlistDescController.text = widget.playlist!.playlistDescription;
+
+      fileName = null; // Reset fileName to allow picking a new image if desired
+    }
+  }
+
+  Future<String> pushImageToStorage(XFile file) async {
+    try {
+      final path = 'playlistsLogo/${file.name}${DateTime.now()}';
+
+      Reference storageRef = FirebaseStorage.instance.ref().child(path);
+
+      UploadTask task = storageRef.putFile(File(file.path));
+
+      TaskSnapshot taskSnapshot = await task.whenComplete(() => null);
+
+      String url = await taskSnapshot.ref.getDownloadURL();
+
+      return url;
+    } catch (e) {
+      Toast.show('Произошла ошибка при загрузке изображения');
+
+      return 'error';
+    }
+  }
+
+  Future<String> pushNewPlaylistToFirestore(Playlist playlist) async {
+    try {
+      if (playlist.playlistId != null) {
+        // Update existing playlist
+
+        await FirebaseFirestore.instance
+            .collection('Playlist')
+            .doc(playlist.playlistId)
+            .update({
+          'Description': playlist.playlistDescription,
+          'Logo': playlist.playlistLogo,
+          'Name': playlist.playlistName,
+          'Playlist': playlist.playlistInJson,
+        });
+
+        Toast.show('Плейлист обновлен');
+      } else {
+        // Create new playlist
+
+        await FirebaseFirestore.instance.collection('Playlist').add({
+          'Description': playlist.playlistDescription,
+          'Logo': playlist.playlistLogo,
+          'Name': playlist.playlistName,
+          'Playlist': playlist.playlistInJson,
+        });
+
+        Toast.show('Плейлист загружен');
+      }
+
+      return 'Success';
+    } catch (e) {
+      Toast.show('Ошибка при загрузке плейлиста');
+
+      return 'error';
+    }
+  }
 
   selectImageFromGallery() async {
     final returnedimage =
@@ -142,53 +233,10 @@ class _PlaylistParametersPageState extends State<PlaylistParametersPage> {
     }
   }
 
-  Future<String> pushImageToStorage(XFile file) async {
-    try {
-      final path = 'playlistsLogo/${file.name}${DateTime.now()}';
-      Reference storageRef = FirebaseStorage.instance.ref().child(path);
-      UploadTask task = storageRef.putFile(File(file.path));
-      TaskSnapshot taskSnapshot = await task.whenComplete(() => null);
-      String url = await taskSnapshot.ref.getDownloadURL();
-      return url;
-    } catch (e) {
-      Toast.show('Some error has occured!$e');
-      return 'error';
-    }
-  }
-
-  Future<String> pushNewPlaylistToFirestore(String name, String playlistInJson,
-      String description, String playlistLogoUrl) async {
-    try {
-      await FirebaseFirestore.instance.collection('Playlist').add({
-        'Description': description,
-        'Logo': playlistLogoUrl,
-        'Name': name,
-        'Playlist': playlistInJson
-      });
-      Toast.show('Плейлист загружен');
-      return 'Succes';
-    } catch (e) {
-      Toast.show('Произошла ошибка при загрузке прлейлиста в сеть. Проверьте своей интернет подключение и/или попробуйте позже!');
-      return 'error';
-    }
-  }
-
-//List<Song> в JSON
-  String songsToJson(List<Song> songs) {
-    List<Map<String, dynamic>> songsMap =
-        songs.map((song) => song.toJson()).toList();
-    return jsonEncode(songsMap);
-  }
-
-//JSON в List<Song>
-  List<Song> songsFromJson(String jsonString) {
-    final List<dynamic> jsonData = jsonDecode(jsonString);
-    return jsonData.map((item) => Song.fromJson(item)).toList();
-  }
-
   @override
   Widget build(BuildContext context) {
     ToastContext().init(context);
+
     return SafeArea(
       child: Scaffold(
         body: Column(
@@ -212,7 +260,7 @@ class _PlaylistParametersPageState extends State<PlaylistParametersPage> {
                       ),
                     ),
                     SizedBox(
-                      width: MediaQuery.of(context).size.width*0.7,
+                      width: MediaQuery.of(context).size.width * 0.7,
                       child: Text(
                           'В случае если вы не предоставите своё изображение, для плейлиста будет использовано изображение из первой композиции в списке.'),
                     ),
@@ -220,155 +268,95 @@ class _PlaylistParametersPageState extends State<PlaylistParametersPage> {
                 ),
               ),
             ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height*0.03,
-            ),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.03),
             TextField(
               controller: playlistNameController,
               decoration: InputDecoration(
-                  hintText: 'Введите название плейлиста',
-                  labelText: 'Название плейлиста',
-                  icon: Icon(Icons.short_text)),
+                hintText: 'Введите название плейлиста',
+                labelText: 'Название плейлиста',
+                icon: Icon(Icons.short_text),
+              ),
             ),
-            SizedBox(
-              height: 20,
-            ),
+            SizedBox(height: 20),
             TextField(
-                controller: playlistDescController,
-                decoration: InputDecoration(
-                    hintText: 'Введите описание плейлиста',
-                    labelText: 'Описание плейлиста',
-                    icon: Icon(Icons.description))),
+              controller: playlistDescController,
+              decoration: InputDecoration(
+                hintText: 'Введите описание плейлиста',
+                labelText: 'Описание плейлиста',
+                icon: Icon(Icons.description),
+              ),
+            ),
           ],
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
         floatingActionButton: Visibility(
-          visible: MediaQuery.of(context).viewInsets.bottom==0.0,
+          visible: MediaQuery.of(context).viewInsets.bottom == 0.0,
           child: Padding(
-            padding: const EdgeInsets.only(bottom: 10.0, left: 15),
+            padding: const EdgeInsets.only(bottom: 10.0, left: 20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 SizedBox(
                     width: MediaQuery.of(context).size.width * 0.45,
                     child: FloatingActionButton.extended(
+                      heroTag: null,
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
                       label: Text('Назад'),
                       icon: Icon(Icons.cancel),
                     )),
-                const SizedBox(
+                SizedBox(
                   width: 20,
                 ),
                 SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.45,
-                    child: FloatingActionButton.extended(
-                      heroTag: null,
-                      onPressed: () async {
-                        if (playlistNameController.text == '' &&
-                            playlistDescController.text == '') {
-                          Toast.show(
-                              'Для продолженния введите название и/или описание плейлиста!');
-                        } else {
-                          String jsonPlaylist = songsToJson(playlist);
-                          if (fileName == null) {
-                            String imgUrl = playlist[0].logo.toString();
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              },
-                            );
-                            await pushNewPlaylistToFirestore(
-                                playlistNameController.text,
-                                jsonPlaylist,
-                                playlistDescController.text,
-                                imgUrl);
-                                Navigator.pop(context);
-                          }
-                          else{
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              },
-                            );
-                            String imgUrl = await pushImageToStorage(_fileName!);
-                            if(imgUrl=='error'){
-                              Navigator.pop(context);
-                              Toast.show('Произошла ошибка при загрузке изображения! Попробуйте позже и/или проверьте свое интернет соединение!');
-                            }
-                            else{
-                              String answer = await pushNewPlaylistToFirestore(playlistNameController.text, jsonPlaylist, playlistDescController.text, imgUrl);
-                              if(answer=='error'){
-                                Navigator.pop(context);
-                              }
-                              else{
-                                Navigator.pop(context);
-                                //тут навигация типа понял да
-                              }
-                            }
-                          }
-                        }
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //       builder: (context) =>
-                        //           const PlaylistParametersPage()),
-                        //);
-                      },
-                      label: Text('Сохранить'),
-                      icon: Icon(Icons.done),
-                    )),
+                  width: MediaQuery.of(context).size.width * 0.45,
+                  child: FloatingActionButton.extended(
+                    onPressed: () async {
+                      if (playlistNameController.text.isEmpty ||
+                          playlistDescController.text.isEmpty) {
+                        Toast.show('Введите название и описание плейлиста');
+
+                        return;
+                      }
+                      String jsonPlaylist = songsToJson(playlist);
+                      String logoUrl;
+                      if (_fileName == null && widget.playlist != null) {
+                        logoUrl = widget.playlist!.playlistLogo;
+                      } else {
+                        logoUrl = await pushImageToStorage(_fileName!);
+                      }
+                      Playlist newPlaylist = Playlist(
+                        playlistName: playlistNameController.text,
+                        playlistLogo: logoUrl,
+                        playlistInJson: jsonPlaylist,
+                        playlistDescription: playlistDescController.text,
+                        playlistId: widget.playlist?.playlistId,
+                      );
+                      showDialog(
+                        context: context,
+                        builder: (context) =>
+                            Center(child: CircularProgressIndicator()),
+                      );
+                      String result =
+                          await pushNewPlaylistToFirestore(newPlaylist);
+
+                      Navigator.pop(context);
+                      if (result == 'Success') {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => PlaylistView()),
+                          (Route<dynamic> route) => false);
+                      }
+                    },
+                    label: Text(
+                        widget.playlist != null ? 'Обновить' : 'Сохранить'),
+                    icon: Icon(Icons.done),
+                  ),
+                ),
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class MusicCard extends StatefulWidget {
-  final Song song;
-  const MusicCard({super.key, required this.song});
-
-  @override
-  State<MusicCard> createState() => _MusicCardState();
-}
-
-class _MusicCardState extends State<MusicCard> {
-  bool? isChecked = true;
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.11,
-      width: MediaQuery.of(context).size.width * 0.3,
-      child: Card(
-        child: ListTile(
-          leading: Image.network(
-            widget.song.logo.toString(),
-          ),
-          title: Text(widget.song.name.toString()),
-          subtitle: Text(widget.song.author.toString()),
-          trailing: Checkbox(
-              value: playlist.contains(widget.song),
-              onChanged: (bool? value) {
-                setState(() {
-                  isChecked = value;
-                });
-                if (value!) {
-                  playlist.add(widget.song);
-                } else {
-                  playlist.remove(widget.song);
-                }
-              }),
-          onTap: () {},
         ),
       ),
     );
@@ -384,10 +372,10 @@ class TrackNameSearchBar extends StatefulWidget {
 
 class TrackNameSearchBarState extends State<TrackNameSearchBar> {
   TextEditingController searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
-    //listener for controller initializing
     searchController.addListener(() {
       setState(() {
         filterSongs();
@@ -395,7 +383,6 @@ class TrackNameSearchBarState extends State<TrackNameSearchBar> {
     });
   }
 
-  //filtering
   void filterSongs() {
     String query = searchController.text.toLowerCase();
     displayedList = allSongs.where((song) {
@@ -405,7 +392,7 @@ class TrackNameSearchBarState extends State<TrackNameSearchBar> {
 
   @override
   void dispose() {
-    searchController.dispose(); //dispose for cleaning some shit
+    searchController.dispose();
     super.dispose();
   }
 
@@ -434,4 +421,62 @@ class TrackNameSearchBarState extends State<TrackNameSearchBar> {
       ],
     );
   }
+}
+
+class MusicCard extends StatefulWidget {
+  final Song song;
+  const MusicCard({super.key, required this.song});
+
+  @override
+  State<MusicCard> createState() => _MusicCardState();
+}
+
+class _MusicCardState extends State<MusicCard> {
+  
+
+  bool? isChecked = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.11,
+      width: MediaQuery.of(context).size.width * 0.3,
+      child: Card(
+        child: ListTile(
+          leading: Image.network(widget.song.logo.toString()),
+          title: Text(widget.song.name.toString()),
+          subtitle: Text(widget.song.author.toString()),
+          trailing: Checkbox(
+              value: playlist.contains(widget.song),
+              onChanged: (bool? value) {
+                setState(() {
+                  isChecked = value;
+                });
+
+                if (value!) {
+                  playlist.add(widget.song);
+                } else {
+                  playlist.remove(widget.song);
+                }
+              }),
+          onTap: () {},
+        ),
+      ),
+    );
+  }
+}
+
+// Utility functions to convert songs to and from JSON
+
+String songsToJson(List<Song> songs) {
+  List<Map<String, dynamic>> songsMap =
+      songs.map((song) => song.toJson()).toList();
+
+  return jsonEncode(songsMap);
+}
+
+List<Song> songsFromJson(String jsonString) {
+  final List<dynamic> jsonData = jsonDecode(jsonString);
+
+  return jsonData.map((item) => Song.fromJson(item)).toList();
 }

@@ -39,7 +39,7 @@ class _SongPageState extends State<SongPage> {
   void initState() {
     super.initState();
     List<AudioSource> sources = [];
-    ConcatenatingAudioSource playlist;
+    ConcatenatingAudioSource concatenatingPlaylist;
     // if (playlist.first == []) {
     //   final _playlist = ConcatenatingAudioSource(children: [
     //     AudioSource.uri(
@@ -70,10 +70,10 @@ class _SongPageState extends State<SongPage> {
       );
     }
     //заполнение источников для фона из массива
-    playlist = ConcatenatingAudioSource(children: sources);
+    concatenatingPlaylist = ConcatenatingAudioSource(children: sources);
     // }
     //устанавливаем источник аудио
-    player.setAudioSource(playlist);
+    player.setAudioSource(concatenatingPlaylist);
     player.load();
   }
 
@@ -110,8 +110,9 @@ class _SongPageState extends State<SongPage> {
                       } else {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                              builder: (context) => PlaylistControlPage(
-                                  playlist: playlist, player: player)),
+                            builder: (context) => PlaylistControlPage(
+                                playlist: widget.playlist, player: player),
+                          ),
                         );
                       }
                     },
