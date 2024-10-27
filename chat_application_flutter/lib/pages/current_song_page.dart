@@ -100,7 +100,7 @@ class _SongPageState extends State<SongPage> {
                     },
                     icon: const Icon(Icons.arrow_back_outlined),
                   ),
-                  const Text('Player'),
+                  const Text('Плеер'),
                   IconButton(
                     onPressed: () {
                       if (playlist.length == 1) {

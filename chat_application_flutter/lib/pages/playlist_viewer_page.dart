@@ -22,11 +22,13 @@ class _PlaylistViewState extends State<PlaylistView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // ignore: deprecated_member_use
+      backgroundColor: Theme.of(context).colorScheme.background,
       floatingActionButton: FloatingActionButton(child: Icon(Icons.playlist_add),onPressed: () {
         Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SwipablePage()));
       },),
       appBar: AppBar(
-        title: const Text('Playlists'),
+        title: const Text('Плейлисты'),
       ),
       drawer: const MyDrawer(),
       body: Column(
@@ -132,7 +134,7 @@ class TrackNameSearchBarState extends State<TrackNameSearchBar> {
   void filterPlaylists() {
     String query = searchController.text.toLowerCase();
     displayedList = allPlaylists.where((playlist) {
-      return playlist.playlistName!.toLowerCase().contains(query);
+      return playlist.playlistName.toLowerCase().contains(query);
     }).toList();
   }
 

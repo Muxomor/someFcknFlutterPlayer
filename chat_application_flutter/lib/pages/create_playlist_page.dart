@@ -55,54 +55,56 @@ class _SongsSelectionPageState extends State<SongsSelectionPage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: Column(
-          children: [
-            StreamBuilder(
-              stream:
-                  FirebaseFirestore.instance.collection('Songs').snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                } else {
-                  var songs = snapshot.data!.docs
-                      .map((doc) => Song(
-                            name: doc['Name'],
-                            author: doc['Author'],
-                            logo: doc['Logo'],
-                            file: doc['File'],
-                          ))
-                      .toList();
-                  allSongs = songs;
-                  displayedList = songs;
-
-                  return TrackNameSearchBar();
-                }
-              },
-            ),
-          ],
+        // ignore: deprecated_member_use
+        backgroundColor: Theme.of(context).colorScheme.background,
+        body: StreamBuilder(
+          stream:
+              FirebaseFirestore.instance.collection('Songs').snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            } else {
+              var songs = snapshot.data!.docs
+                  .map((doc) => Song(
+                        name: doc['Name'],
+                        author: doc['Author'],
+                        logo: doc['Logo'],
+                        file: doc['File'],
+                      ))
+                  .toList();
+              allSongs = songs;
+              displayedList = songs;
+        
+              return TrackNameSearchBar();
+            }
+          },
         ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: Padding(
-          padding: const EdgeInsets.only(bottom: 10.0, left: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.45,
+              Expanded(
                 child: FloatingActionButton.extended(
                   heroTag: null,
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
                   label: Text('Отменить'),
+                  backgroundColor: Colors.red,
                   icon: Icon(Icons.cancel),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
-              const SizedBox(width: 20),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.45,
+              const SizedBox(width: 16),
+              Expanded(
                 child: FloatingActionButton.extended(
+                  backgroundColor: Colors.green,
                   heroTag: null,
                   onPressed: () {
                     if (playlist.isEmpty) {
@@ -120,7 +122,9 @@ class _SongsSelectionPageState extends State<SongsSelectionPage> {
                     }
                   },
                   label: Text('Далее'),
-                  icon: Icon(Icons.done),
+                  icon: Icon(Icons.done),shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
             ],
@@ -142,11 +146,8 @@ class PlaylistParametersPage extends StatefulWidget {
 
 class _PlaylistParametersPageState extends State<PlaylistParametersPage> {
   File? _selectedFile;
-
   XFile? _fileName;
-
   TextEditingController playlistNameController = TextEditingController();
-
   TextEditingController playlistDescController = TextEditingController();
 
   @override
@@ -155,10 +156,8 @@ class _PlaylistParametersPageState extends State<PlaylistParametersPage> {
 
     if (widget.playlist != null) {
       playlistNameController.text = widget.playlist!.playlistName;
-
       playlistDescController.text = widget.playlist!.playlistDescription;
-
-      fileName = null; // Reset fileName to allow picking a new image if desired
+      fileName = null; // обнуляем это дерьмо чтобы дать возможность заменить его
     }
   }
 
@@ -239,6 +238,8 @@ class _PlaylistParametersPageState extends State<PlaylistParametersPage> {
 
     return SafeArea(
       child: Scaffold(
+        // ignore: deprecated_member_use
+        backgroundColor: Theme.of(context).colorScheme.background,
         body: Column(
           children: [
             Center(
@@ -288,41 +289,43 @@ class _PlaylistParametersPageState extends State<PlaylistParametersPage> {
             ),
           ],
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: Visibility(
           visible: MediaQuery.of(context).viewInsets.bottom == 0.0,
           child: Padding(
-            padding: const EdgeInsets.only(bottom: 10.0, left: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.45,
-                    child: FloatingActionButton.extended(
-                      heroTag: null,
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      label: Text('Назад'),
-                      icon: Icon(Icons.cancel),
-                    )),
+                Expanded(
+                  child: FloatingActionButton.extended(
+                    heroTag: null,
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    label: Text('Назад'),
+                    icon: Icon(Icons.cancel),
+                  backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                  ),
+                ),
                 SizedBox(
                   width: 20,
                 ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.45,
+                Expanded(
                   child: FloatingActionButton.extended(
                     onPressed: () async {
                       if (playlistNameController.text.isEmpty ||
                           playlistDescController.text.isEmpty) {
                         Toast.show('Введите название и описание плейлиста');
-
                         return;
                       }
                       String jsonPlaylist = songsToJson(playlist);
                       String logoUrl;
-                      if (_fileName == null && widget.playlist != null) {
-                        logoUrl = widget.playlist!.playlistLogo;
+                      if (_fileName == null || widget.playlist != null) {
+                        logoUrl = widget.playlist?.playlistLogo??playlist[0].logo.toString();
                       } else {
                         logoUrl = await pushImageToStorage(_fileName!);
                       }
@@ -340,7 +343,7 @@ class _PlaylistParametersPageState extends State<PlaylistParametersPage> {
                       );
                       String result =
                           await pushNewPlaylistToFirestore(newPlaylist);
-
+                  
                       Navigator.pop(context);
                       if (result == 'Success') {
                         Navigator.pushAndRemoveUntil(
@@ -352,6 +355,10 @@ class _PlaylistParametersPageState extends State<PlaylistParametersPage> {
                     label: Text(
                         widget.playlist != null ? 'Обновить' : 'Сохранить'),
                     icon: Icon(Icons.done),
+                    shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  backgroundColor: Colors.green,
                   ),
                 ),
               ],
@@ -409,14 +416,17 @@ class TrackNameSearchBarState extends State<TrackNameSearchBar> {
             ),
           ),
         ),
-        ListView.builder(
-          shrinkWrap: true,
-          itemCount: displayedList.length,
-          itemBuilder: (context, index) {
-            return MusicCard(
-              song: displayedList[index],
-            );
-          },
+        Expanded(
+          child: ListView.builder(
+            padding: EdgeInsets.only(bottom: 70),
+            shrinkWrap: true,
+            itemCount: displayedList.length,
+            itemBuilder: (context, index) {
+              return MusicCard(
+                song: displayedList[index],
+              );
+            },
+          ),
         ),
       ],
     );

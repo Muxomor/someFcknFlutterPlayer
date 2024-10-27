@@ -1,5 +1,4 @@
 import 'package:chat_application_flutter/components/Song.dart';
-import 'package:chat_application_flutter/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
@@ -42,21 +41,24 @@ class _PlaylistControlPageState extends State<PlaylistControlPage> {
                   },
                   icon: const Icon(Icons.arrow_back_outlined),
                 ),
+                Text('Менеджер очереди плейлиста'),
               ],
             ),
-            ListView.builder(
-              shrinkWrap: true,
-              itemCount: widget.playlist.length,
-              itemBuilder: (context, index) {
-                //обернуто в InheritedWidget для получения AudioPlayer в MusicCard
-                return CurrentAudioPlayer(
-                  player: widget.player,
-                  child: MusicCard(
-                    song: widget.playlist[index],
-                    index: index,
-                  ),
-                );
-              },
+            Expanded(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: widget.playlist.length,
+                itemBuilder: (context, index) {
+                  //обернуто в InheritedWidget для получения AudioPlayer в MusicCard
+                  return CurrentAudioPlayer(
+                    player: widget.player,
+                    child: MusicCard(
+                      song: widget.playlist[index],
+                      index: index,
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),

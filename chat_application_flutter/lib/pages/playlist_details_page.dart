@@ -27,7 +27,8 @@ class PlaylistDetailsPage extends StatefulWidget {
 
 class _PlaylistDetailsPageState extends State<PlaylistDetailsPage> {
   late List<Song> songs;
-
+  bool isNameExpanded = false;
+  bool isDescExpanded = false;
   @override
   void initState() {
     super.initState();
@@ -40,12 +41,32 @@ class _PlaylistDetailsPageState extends State<PlaylistDetailsPage> {
     songs = jsonList.map((json) => Song.fromJson(json)).toList();
   }
 
+  void _toggleExpansion(bool parameter) {
+    setState(() {
+      parameter = !parameter;
+    });
+  }
+
+  int getNumberOfCharactersToDisplay(String value, bool isExpanded) {
+    if (isExpanded) {
+      return value.length;
+    } else {
+      if (value.length <= 20) {
+        return value.length;
+      } else {
+        return 21;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // ignore: deprecated_member_use
+      backgroundColor: Theme.of(context).colorScheme.background,
       extendBody: true,
       appBar: AppBar(
-        title: const Text('Playlist Details'),
+        title: const Text('Информация о плейлисте'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -67,20 +88,63 @@ class _PlaylistDetailsPageState extends State<PlaylistDetailsPage> {
               ),
             ),
             const SizedBox(height: 16),
-            Text(
-              widget.playlist.playlistName.toString(),
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  isNameExpanded = !isNameExpanded;
+                });
+              },
+              child: RichText(
+                  text: TextSpan(
+                 children: [
+                  if (isNameExpanded||widget.playlist.playlistName.toString().length<=20) TextSpan() else TextSpan(
+                    text: ' ...',
+                    style: TextStyle(
+                      color: Colors.grey,
+                    ),
+                  ),
+                  
+                ],
+                text: widget.playlist.playlistName.toString().substring(
+                    0,
+                    getNumberOfCharactersToDisplay(
+                        widget.playlist.playlistName.toString(),
+                        isNameExpanded)),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              )),
             ),
             const SizedBox(height: 8),
-            Text(
-              widget.playlist.playlistDescription.toString(),
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
+             GestureDetector(
+              onTap: () {
+                setState(() {
+                  isDescExpanded = !isDescExpanded;
+                });
+              },
+              child: RichText(
+                  text: TextSpan(
+                 children: [
+                  if (isDescExpanded||widget.playlist.playlistDescription.toString().length<=20) TextSpan() else TextSpan(
+                    text: ' ...',
+                    style: TextStyle(
+                      color: Colors.grey,
+                    ),
+                  ),
+                  
+                ],
+                text: widget.playlist.playlistDescription.toString().substring(
+                    0,
+                    getNumberOfCharactersToDisplay(
+                        widget.playlist.playlistDescription.toString(),
+                        isDescExpanded)),
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold,
+                ),
+              )),
             ),
             const SizedBox(height: 16),
             const Text(
@@ -93,6 +157,7 @@ class _PlaylistDetailsPageState extends State<PlaylistDetailsPage> {
             const SizedBox(height: 8),
             Expanded(
               child: ListView.builder(
+                shrinkWrap: true,
                 itemCount: songs.length,
                 itemBuilder: (context, index) {
                   return MusicCard(song: songs[index]);
@@ -124,7 +189,10 @@ class _PlaylistDetailsPageState extends State<PlaylistDetailsPage> {
             IconButton(
               icon: const Icon(Icons.edit, color: Colors.black54),
               onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SongsSelectionPage(playlist: widget.playlist,)));
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => SongsSelectionPage(
+                          playlist: widget.playlist,
+                        )));
               },
             ),
             FloatingActionButton(

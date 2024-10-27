@@ -1,5 +1,6 @@
 import 'package:chat_application_flutter/components/Song.dart';
 import 'package:chat_application_flutter/pages/current_song_page.dart';
+import 'package:chat_application_flutter/pages/new_song_page.dart';
 import 'package:chat_application_flutter/pages/playlist_viewer_page.dart';
 import 'package:chat_application_flutter/pages/radios_page.dart';
 import 'package:flutter/material.dart';
@@ -24,67 +25,77 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     ToastContext().init(context);
     return Scaffold(
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+              heroTag: 'createSongBtn',
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => FileSelectionPage()),
+                );
+              },
+              child: const Icon(
+                Icons.upload_sharp,
+              ),
+            ),
+            SizedBox(width: 10,),
+            FloatingActionButton(
+              heroTag: 'playPlaylistBtn',
+              onPressed: () async {
+                if (playlist.isEmpty) {
+                  Toast.show(
+                      'Для начала работы выберите один или более треков из треклиста');
+                } else {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => SongPage(
+                        playlist: playlist,
+                      ),
+                    ),
+                  );
+                }
+              },
+              child: const Icon(
+                Icons.play_circle_fill,
+              ),
+            )
+          ],
+        ),
+      ),
       // ignore: deprecated_member_use
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        title: const Text('Deez Nuts'),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              if (playlist.isEmpty) {
-                Toast.show(
-                    'Для начала работы выберите один или более треков из треклиста');
-              } else {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => SongPage(
-                      playlist: playlist,
-                    ),
-                  ),
-                );
-              }
-            },
-            icon: Icon(
-              Icons.play_circle_fill,
-              color: Theme.of(context).colorScheme.inversePrimary,
-            ),
-          ),
-        ],
+        title: const Text('Бибилотека'),
       ),
       drawer: const MyDrawer(),
-      body: Column(
-        children: [
-          StreamBuilder(
-            stream: FirebaseFirestore.instance.collection('Songs').snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              } else {
-                var songs = snapshot.data!.docs
-                    .map((doc) => Song(
-                          name: doc['Name'],
-                          author: doc['Author'],
-                          logo: doc['Logo'],
-                          file: doc['File'],
-                        ))
-                    .toList();
-                allSongs = songs;
-                displayedList = songs;
-                return TrackNameSearchBar();
-              }
-            },
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const RadioPage()),
-          );
-        },
-        child: const Icon(Icons.radio),
+      body: SizedBox(
+        height: MediaQuery.of(context).size.height,
+        child: StreamBuilder(
+          stream: FirebaseFirestore.instance.collection('Songs').snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            } else {
+              var songs = snapshot.data!.docs
+                  .map((doc) => Song(
+                        name: doc['Name'],
+                        author: doc['Author'],
+                        logo: doc['Logo'],
+                        file: doc['File'],
+                      ))
+                  .toList();
+              allSongs = songs;
+              displayedList = songs;
+              return TrackNameSearchBar();
+            }
+          },
+        ),
       ),
     );
   }
@@ -206,7 +217,7 @@ class MyDrawer extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: ListTile(
                 title: const Text(
-                  'Radio',
+                  'Радио',
                   style: TextStyle(fontSize: 20),
                 ),
                 leading: const Icon(
@@ -234,7 +245,7 @@ class MyDrawer extends StatelessWidget {
               title: Row(
                 children: [
                   const Text(
-                    'Change theme',
+                    'Сменить тему',
                     style: TextStyle(fontSize: 20),
                   ),
                   Switch(
@@ -273,10 +284,11 @@ class TrackNameSearchBarState extends State<TrackNameSearchBar> {
     super.initState();
     //listener for controller initializing
     searchController.addListener(() {
-      if(mounted){
-      setState(() {
-        filterSongs();
-      });}
+      if (mounted) {
+        setState(() {
+          filterSongs();
+        });
+      }
     });
   }
 
@@ -288,11 +300,6 @@ class TrackNameSearchBarState extends State<TrackNameSearchBar> {
     }).toList();
   }
 
-  // @override
-  // void dispose() {
-  //   searchController.dispose(); //dispose for cleaning some shit
-  //   super.dispose();
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -303,19 +310,30 @@ class TrackNameSearchBarState extends State<TrackNameSearchBar> {
           child: SizedBox(
             child: SearchBar(
               controller: searchController,
-              hintText: 'Hint: Search by name of the song',
+              hintText: 'Поиск по названию композиции',
             ),
           ),
         ),
-        ListView.builder(
-          shrinkWrap: true,
-          itemCount: displayedList.length,
-          itemBuilder: (context, index) {
-            return MusicCard(
-              song: displayedList[index],
-            );
-          },
-        ),
+        if (displayedList.isNotEmpty)
+          Expanded(
+            child: ListView.builder(
+              //physics: NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.only(bottom: 70),
+              shrinkWrap: true,
+              itemCount: displayedList.length,
+              itemBuilder: (context, index) {
+                return MusicCard(
+                  song: displayedList[index],
+                );
+              },
+            ),
+          )
+        else
+          const Expanded(
+            child: Center(
+              child: Text('Нет доступных песен!'),
+            ),
+          ),
       ],
     );
   }
