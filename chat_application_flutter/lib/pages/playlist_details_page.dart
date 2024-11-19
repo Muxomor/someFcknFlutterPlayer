@@ -96,14 +96,17 @@ class _PlaylistDetailsPageState extends State<PlaylistDetailsPage> {
               },
               child: RichText(
                   text: TextSpan(
-                 children: [
-                  if (isNameExpanded||widget.playlist.playlistName.toString().length<=20) TextSpan() else TextSpan(
-                    text: ' ...',
-                    style: TextStyle(
-                      color: Colors.grey,
+                children: [
+                  if (isNameExpanded ||
+                      widget.playlist.playlistName.toString().length <= 20)
+                    TextSpan()
+                  else
+                    TextSpan(
+                      text: ' ...',
+                      style: TextStyle(
+                        color: Colors.grey,
+                      ),
                     ),
-                  ),
-                  
                 ],
                 text: widget.playlist.playlistName.toString().substring(
                     0,
@@ -117,7 +120,7 @@ class _PlaylistDetailsPageState extends State<PlaylistDetailsPage> {
               )),
             ),
             const SizedBox(height: 8),
-             GestureDetector(
+            GestureDetector(
               onTap: () {
                 setState(() {
                   isDescExpanded = !isDescExpanded;
@@ -125,14 +128,18 @@ class _PlaylistDetailsPageState extends State<PlaylistDetailsPage> {
               },
               child: RichText(
                   text: TextSpan(
-                 children: [
-                  if (isDescExpanded||widget.playlist.playlistDescription.toString().length<=20) TextSpan() else TextSpan(
-                    text: ' ...',
-                    style: TextStyle(
-                      color: Colors.grey,
+                children: [
+                  if (isDescExpanded ||
+                      widget.playlist.playlistDescription.toString().length <=
+                          20)
+                    TextSpan()
+                  else
+                    TextSpan(
+                      text: ' ...',
+                      style: TextStyle(
+                        color: Colors.grey,
+                      ),
                     ),
-                  ),
-                  
                 ],
                 text: widget.playlist.playlistDescription.toString().substring(
                     0,

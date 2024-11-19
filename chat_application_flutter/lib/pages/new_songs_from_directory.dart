@@ -1,33 +1,34 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/cupertino.dart';
+import 'package:path/path.dart' as p;
+import 'package:audiotags/audiotags.dart';
 import 'package:chat_application_flutter/components/Song.dart';
 import 'package:chat_application_flutter/pages/home_page.dart';
-import 'package:chat_application_flutter/pages/new_songs_from_directory.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:toast/toast.dart';
-import 'package:audiotags/audiotags.dart';
 
-class FileSelectionPage extends StatefulWidget {
-  const FileSelectionPage({super.key});
+class PathSelectionPage extends StatefulWidget {
+  const PathSelectionPage({super.key});
 
   @override
-  State<FileSelectionPage> createState() => _FileSelectionPageState();
+  State<PathSelectionPage> createState() => _PathSelectionPageState();
 }
 
-class _FileSelectionPageState extends State<FileSelectionPage> {
+class _PathSelectionPageState extends State<PathSelectionPage> {
   String _selectedFile = '';
   String filePath = '';
 
-  void _onFileSelected(FilePickerResult result) {
+  void _onFileSelected(String result) {
     setState(() {
-      _selectedFile = result.files.single.name;
-      filePath = result.files.single.path ?? '';
+      _selectedFile = result;
+      filePath = result;
     });
   }
 
@@ -62,9 +63,9 @@ class _FileSelectionPageState extends State<FileSelectionPage> {
                   ),
                 ),
                 onPressed: () async {
-                  final result = await FilePicker.platform.pickFiles(
-                    type: FileType.custom,
-                    allowedExtensions: ['aac', 'flac', 'mp3', 'ogg', 'wav'],
+                  final result = await FilePicker.platform.getDirectoryPath(
+                      dialogTitle: "Выберите директорию альбома",
+                      initialDirectory: _selectedFile,
                   );
 
                   if (result != null) {
@@ -92,6 +93,20 @@ class _FileSelectionPageState extends State<FileSelectionPage> {
             Toast.show('Для продолжения выберите файл!');
           } else {
             try {
+              var dir = Directory(_selectedFile);
+              var dirList = dir.list();
+              List<String> songsPathList = new List.empty();
+              List<String> songsLogoPathList = new List.empty();
+              await for (final FileSystemEntity currentFile in dirList){
+                if(currentFile is File){
+                  if(p.extension(currentFile.path)=='.mp3'||p.extension(currentFile.path)=='.flac'|| p.extension(_selectedFile)=='.wav'|| p.extension(_selectedFile)=='.ogg'|| p.extension(_selectedFile)=='aac'){
+                    songsPathList.add(currentFile.path);
+                  }
+                  else if(p.extension(currentFile.path)=='.jpg'|| p.extension(_selectedFile)=='.png'){
+                    songsLogoPathList.add(currentFile.path);
+                  }
+                }
+              }
               bool hasImage = await hasImageInFile(filePath);
               Tag? tag = await AudioTags.read(filePath);
               if (!hasImage) {

@@ -203,7 +203,7 @@ class MyDrawer extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: ListTile(
               title: const Text(
-                'Home',
+                'На главную',
                 style: TextStyle(fontSize: 20),
               ),
               leading: const Icon(
@@ -245,7 +245,7 @@ class MyDrawer extends StatelessWidget {
               title: Row(
                 children: [
                   const Text(
-                    'Сменить тему',
+                    'Сменить тему ',
                     style: TextStyle(fontSize: 20),
                   ),
                   Switch(

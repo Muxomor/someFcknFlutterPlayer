@@ -152,7 +152,7 @@ class MyDrawer extends StatelessWidget {
               title: Row(
                 children: [
                   const Text(
-                    'Сменить тему',
+                    'Сменить тему ',
                     style: TextStyle(fontSize: 20),
                   ),
                   Switch(
