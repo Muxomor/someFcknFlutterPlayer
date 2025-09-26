@@ -20,6 +20,7 @@ class SongPage extends StatefulWidget {
 class _SongPageState extends State<SongPage> {
   final player = AudioPlayer();
   bool isOnRepeat = false;
+  bool isShuffled = false;
   Duration currentDuration = Duration.zero;
   Duration totalDuration = Duration.zero;
 
@@ -39,7 +40,7 @@ class _SongPageState extends State<SongPage> {
   void initState() {
     super.initState();
     List<AudioSource> sources = [];
-    ConcatenatingAudioSource playlist;
+    ConcatenatingAudioSource concatenatingPlaylist;
     // if (playlist.first == []) {
     //   final _playlist = ConcatenatingAudioSource(children: [
     //     AudioSource.uri(
@@ -70,10 +71,10 @@ class _SongPageState extends State<SongPage> {
       );
     }
     //заполнение источников для фона из массива
-    playlist = ConcatenatingAudioSource(children: sources);
+    concatenatingPlaylist = ConcatenatingAudioSource(children: sources);
     // }
     //устанавливаем источник аудио
-    player.setAudioSource(playlist);
+    player.setAudioSource(concatenatingPlaylist);
     player.load();
   }
 
@@ -81,192 +82,211 @@ class _SongPageState extends State<SongPage> {
   Widget build(BuildContext context) {
     //player.setLoopMode(LoopMode.all);
     ToastContext().init(context);
-    return Scaffold(
-      // ignore: deprecated_member_use
-      backgroundColor: Theme.of(context).colorScheme.background,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.only(left: 25, right: 0, bottom: 25),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    onPressed: () async {
-                      await player.stop();
-                      Navigator.pop(context);
-                    },
-                    icon: const Icon(Icons.arrow_back_outlined),
-                  ),
-                  const Text('Player'),
-                  IconButton(
-                    onPressed: () {
-                      if (playlist.length == 1) {
-                        //TODO: придумай че сюда написать нормальное
-                        Toast.show(
-                            'There is no available songs in your playlist');
-                      } else {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                              builder: (context) => PlaylistControlPage(
-                                  playlist: playlist, player: player)),
-                        );
-                      }
-                    },
-                    icon: const Icon(Icons.menu),
-                  ),
-                ],
-              ),
-              //logo + artist name + track name
-              PhotoBox(
-                child: Column(
+    // ignore: deprecated_member_use
+    return WillPopScope(
+      onWillPop: ()async {return false;  },
+      child: Scaffold(
+        // ignore: deprecated_member_use
+        backgroundColor: Theme.of(context).colorScheme.background,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 25, right: 0, bottom: 25),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    StreamBuilder(
-                      stream: player.sequenceStateStream,
-                      builder: (context, snapshot) {
-                        final state = snapshot.data;
-                        if (state?.sequence.isEmpty ?? true) {
-                          return const SizedBox();
-                        }
-                        final metadata = state!.currentSource!.tag as MediaItem;
-                        return MediaMetadata(
-                          logoLink: metadata.artUri.toString(),
-                          name: metadata.title,
-                          author: metadata.artist.toString(),
-                        );
+                    IconButton(
+                      onPressed: () async {
+                        await player.stop();
+                        Navigator.pop(context);
                       },
+                      icon: const Icon(Icons.arrow_back_outlined),
+                    ),
+                    const Text('Плеер'),
+                    IconButton(
+                      onPressed: () {
+                        if (playlist.length == 1) {
+                          //TODO: придумай че сюда написать нормальное
+                          Toast.show(
+                              'There is no available songs in your playlist');
+                        } else {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => PlaylistControlPage(
+                                  playlist: widget.playlist, player: player),
+                            ),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.menu),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 25),
-                    child: Column(
-                      children: [
-                        //instruments, repeat, shuffle, etc...
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            IconButton(
-                              onPressed: () async {
-                                if (player.loopMode == LoopMode.all) {
-                                  await player.setLoopMode(LoopMode.one);
-                                  setState(() {
-                                    isOnRepeat = !isOnRepeat;
-                                  });
-                                } else if (player.loopMode == LoopMode.one) {
-                                  await player.setLoopMode(LoopMode.all);
-                                  setState(() {
-                                    isOnRepeat = !isOnRepeat;
-                                  });
-                                } else {
-                                  await player.setLoopMode(LoopMode.all);
-                                }
-                              },
-                              icon: !isOnRepeat
-                                  ? const Icon(Icons.repeat)
-                                  : const Icon(Icons.repeat_one),
-                            ),
-                          ],
-                        ),
-                        //progress bar for current track
-                        StreamBuilder<PositionData>(
-                          stream: _positionDataStream,
-                          builder: (context, snapshot) {
-                            final positionData = snapshot.data;
-                            return ProgressBar(
-                              progress: positionData?.position ?? Duration.zero,
-                              buffered: positionData?.bufferedPosition ??
-                                  Duration.zero,
-                              total: positionData?.duration ?? Duration.zero,
-                              onSeek: player.seek,
-                            );
-                          },
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              //seek -30
-                              child: PhotoBox(
-                                child: IconButton(
-                                  icon: const Icon(Icons.replay_30),
-                                  onPressed: () {
-                                    player.seek(
-                                      Duration(
-                                          seconds:
-                                              player.position.inSeconds - 30),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 20,
-                            ),
-                            Expanded(
-                              flex: 2,
-                              //play pause button
-                              child: PhotoBox(
-                                child: StreamBuilder<PlayerState>(
-                                  stream: player.playerStateStream,
-                                  builder: (context, snapshot) {
-                                    final playerState = snapshot.data;
-                                    final processtingState =
-                                        playerState?.processingState;
-                                    final playing = playerState?.playing;
-                                    if (!(playing ?? false)) {
-                                      return IconButton(
-                                        onPressed: player.play,
-                                        icon: const Icon(Icons.play_arrow),
-                                      );
-                                    } else if (processtingState !=
-                                        ProcessingState.completed) {
-                                      return IconButton(
-                                        onPressed: player.pause,
-                                        icon: const Icon(Icons.pause),
-                                      );
-                                    }
-                                    return const Icon(Icons.play_arrow);
-                                  },
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 20,
-                            ),
-                            Expanded(
-                              //seek +30
-                              child: PhotoBox(
-                                child: IconButton(
-                                  icon: const Icon(Icons.forward_30),
-                                  onPressed: () async => {
-                                    await player.seek(
-                                      Duration(
-                                          seconds:
-                                              player.position.inSeconds + 30),
-                                    ),
-                                  },
-                                ),
-                              ),
-                            )
-                          ],
-                        )
-                      ],
-                    ),
+                //logo + artist name + track name
+                PhotoBox(
+                  child: Column(
+                    children: [
+                      StreamBuilder(
+                        stream: player.sequenceStateStream,
+                        builder: (context, snapshot) {
+                          final state = snapshot.data;
+                          if (state?.sequence.isEmpty ?? true) {
+                            return const SizedBox();
+                          }
+                          final metadata = state!.currentSource!.tag as MediaItem;
+                          return MediaMetadata(
+                            logoLink: metadata.artUri.toString(),
+                            name: metadata.title,
+                            author: metadata.artist.toString(),
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                ],
-              )
-            ],
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 25),
+                      child: Column(
+                        children: [
+                          //instruments, repeat, shuffle, etc...
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              IconButton(onPressed: ()async{
+                                if(player.shuffleModeEnabled){
+                                  await player.setShuffleModeEnabled(isShuffled);
+                                  setState(() {
+                                    isShuffled=!isShuffled;
+                                  });
+                                }
+                                else{
+                                  await player.setShuffleModeEnabled(isShuffled);
+                                  setState(() {
+                                    isShuffled=!isShuffled;
+                                  });
+                                }
+                              }, icon: !isShuffled?const Icon(Icons.shuffle):const Icon(Icons.shuffle_on)),
+                              IconButton(
+                                onPressed: () async {
+                                  if (player.loopMode == LoopMode.all) {
+                                    await player.setLoopMode(LoopMode.one);
+                                    setState(() {
+                                      isOnRepeat = !isOnRepeat;
+                                    });
+                                  } else if (player.loopMode == LoopMode.one) {
+                                    await player.setLoopMode(LoopMode.all);
+                                    setState(() {
+                                      isOnRepeat = !isOnRepeat;
+                                    });
+                                  } else {
+                                    await player.setLoopMode(LoopMode.all);
+                                  }
+                                },
+                                icon: !isOnRepeat
+                                    ? const Icon(Icons.repeat)
+                                    : const Icon(Icons.repeat_one),
+                              ),
+                            ],
+                          ),
+                          //progress bar for current track
+                          StreamBuilder<PositionData>(
+                            stream: _positionDataStream,
+                            builder: (context, snapshot) {
+                              final positionData = snapshot.data;
+                              return ProgressBar(
+                                progress: positionData?.position ?? Duration.zero,
+                                buffered: positionData?.bufferedPosition ??
+                                    Duration.zero,
+                                total: positionData?.duration ?? Duration.zero,
+                                onSeek: player.seek,
+                              );
+                            },
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                //seek -30
+                                child: PhotoBox(
+                                  child: IconButton(
+                                    icon: const Icon(Icons.replay_30),
+                                    onPressed: () {
+                                      player.seek(
+                                        Duration(
+                                            seconds:
+                                                player.position.inSeconds - 30),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 20,
+                              ),
+                              Expanded(
+                                flex: 2,
+                                //play pause button
+                                child: PhotoBox(
+                                  child: StreamBuilder<PlayerState>(
+                                    stream: player.playerStateStream,
+                                    builder: (context, snapshot) {
+                                      final playerState = snapshot.data;
+                                      final processtingState =
+                                          playerState?.processingState;
+                                      final playing = playerState?.playing;
+                                      if (!(playing ?? false)) {
+                                        return IconButton(
+                                          onPressed: player.play,
+                                          icon: const Icon(Icons.play_arrow),
+                                        );
+                                      } else if (processtingState !=
+                                          ProcessingState.completed) {
+                                        return IconButton(
+                                          onPressed: player.pause,
+                                          icon: const Icon(Icons.pause),
+                                        );
+                                      }
+                                      return const Icon(Icons.play_arrow);
+                                    },
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 20,
+                              ),
+                              Expanded(
+                                //seek +30
+                                child: PhotoBox(
+                                  child: IconButton(
+                                    icon: const Icon(Icons.forward_30),
+                                    onPressed: () async => {
+                                      await player.seek(
+                                        Duration(
+                                            seconds:
+                                                player.position.inSeconds + 30),
+                                      ),
+                                    },
+                                  ),
+                                ),
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
           ),
         ),
       ),
