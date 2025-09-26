@@ -30,7 +30,7 @@ class _SwipablePageState extends State<SwipablePage> {
 }
 
 class SongsSelectionPage extends StatefulWidget {
-  final Playlist? playlist; // Accept an optional Playlist object
+  final Playlist? playlist; 
 
   const SongsSelectionPage({super.key, this.playlist});
 
@@ -136,7 +136,7 @@ class _SongsSelectionPageState extends State<SongsSelectionPage> {
 }
 
 class PlaylistParametersPage extends StatefulWidget {
-  final Playlist? playlist; // Accept an optional Playlist object
+  final Playlist? playlist; 
 
   const PlaylistParametersPage({super.key, this.playlist});
 

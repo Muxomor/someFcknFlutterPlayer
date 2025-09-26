@@ -7,7 +7,7 @@ class Playlist {
 
   final String playlistDescription;
 
-  final String? playlistId; // Optional, if editing an existing playlist
+  final String? playlistId; 
 
   Playlist({
     required this.playlistName,
